@@ -110,11 +110,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addProduto: (p) =>
       setProdutos((prev) => [
         ...prev,
-        { id: crypto.randomUUID(), emoji: p.emoji || "🌱", ...p },
+        { id: crypto.randomUUID(), ...p, imagem: p.imagem || "" },
       ]),
     updateProduto: (id, p) =>
       setProdutos((prev) =>
-        prev.map((x) => (x.id === id ? { ...x, ...p, emoji: p.emoji || x.emoji } : x)),
+        prev.map((x) => (x.id === id ? { ...x, ...p, imagem: p.imagem ?? x.imagem } : x)),
       ),
     deleteProduto: (id) => setProdutos((prev) => prev.filter((x) => x.id !== id)),
     alterarStatusPedido: (id, status) =>
