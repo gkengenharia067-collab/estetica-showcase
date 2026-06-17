@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Plus, Pencil, Trash2, X } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Camera } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { useStore, type Produto } from "@/lib/store";
 
@@ -24,7 +24,7 @@ type FormState = {
   estoque: string;
   unidade: string;
   categoria: string;
-  emoji: string;
+  imagem: string;
 };
 
 const emptyForm: FormState = {
@@ -33,7 +33,7 @@ const emptyForm: FormState = {
   estoque: "",
   unidade: "kg",
   categoria: "Hortaliças",
-  emoji: "🌱",
+  imagem: "",
 };
 
 function ProdutosPage() {
@@ -55,7 +55,7 @@ function ProdutosPage() {
       estoque: String(p.estoque),
       unidade: p.unidade,
       categoria: p.categoria,
-      emoji: p.emoji,
+      imagem: p.imagem,
     });
     setOpen(true);
   }
@@ -67,7 +67,7 @@ function ProdutosPage() {
       estoque: Number(form.estoque) || 0,
       unidade: form.unidade,
       categoria: form.categoria,
-      emoji: form.emoji,
+      imagem: form.imagem.trim(),
     };
     if (editing) updateProduto(editing.id, payload);
     else addProduto(payload);
@@ -97,8 +97,12 @@ function ProdutosPage() {
             key={p.id}
             className="rounded-2xl bg-card border border-border overflow-hidden flex flex-col"
           >
-            <div className="h-40 bg-accent/40 flex items-center justify-center text-7xl">
-              <span aria-hidden>{p.emoji}</span>
+            <div className="h-40 bg-accent/40 flex items-center justify-center overflow-hidden">
+              {p.imagem ? (
+                <img src={p.imagem} alt={p.nome} className="w-full h-full object-cover" />
+              ) : (
+                <Camera className="size-12 text-muted-foreground" aria-hidden />
+              )}
             </div>
             <div className="p-5 flex-1 flex flex-col">
               <div className="text-xs uppercase tracking-wide text-muted-foreground">
@@ -211,23 +215,20 @@ function ProdutosPage() {
                   </select>
                 </Field>
               </div>
-              <Field label="Ícone">
-                <div className="flex flex-wrap gap-2">
-                  {["🍅","🍯","🥚","🥬","🥕","🍓","🌽","🥛","🐓","🌱"].map((e) => (
-                    <button
-                      key={e}
-                      type="button"
-                      onClick={() => setForm({ ...form, emoji: e })}
-                      className={
-                        "size-10 rounded-lg text-2xl flex items-center justify-center border transition-colors " +
-                        (form.emoji === e
-                          ? "border-primary bg-primary/10"
-                          : "border-border hover:bg-muted")
-                      }
-                    >
-                      {e}
-                    </button>
-                  ))}
+              <Field label="URL da Imagem">
+                <input
+                  type="url"
+                  value={form.imagem}
+                  onChange={(e) => setForm({ ...form, imagem: e.target.value })}
+                  className="input"
+                  placeholder="https://exemplo.com/foto.jpg"
+                />
+                <div className="mt-3 w-24 h-24 rounded-lg bg-accent/40 flex items-center justify-center overflow-hidden border border-border">
+                  {form.imagem ? (
+                    <img src={form.imagem} alt="Pré-visualização" className="w-full h-full object-cover" />
+                  ) : (
+                    <Camera className="size-8 text-muted-foreground" aria-hidden />
+                  )}
                 </div>
               </Field>
 

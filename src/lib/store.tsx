@@ -7,7 +7,7 @@ export type Produto = {
   estoque: number;
   unidade: string;
   categoria: string;
-  emoji: string;
+  imagem: string;
 };
 
 export type StatusPedido = "Pendente" | "Em preparação" | "Entregue";
@@ -25,9 +25,9 @@ export type Pedido = {
 };
 
 const produtosIniciais: Produto[] = [
-  { id: "p1", nome: "Tomate orgânico", preco: 8, estoque: 45, unidade: "kg", categoria: "Hortaliças", emoji: "🍅" },
-  { id: "p2", nome: "Mel artesanal", preco: 35, estoque: 12, unidade: "pote 500g", categoria: "Apicultura", emoji: "🍯" },
-  { id: "p3", nome: "Ovos caipiras", preco: 22, estoque: 30, unidade: "dúzia", categoria: "Aves", emoji: "🥚" },
+  { id: "p1", nome: "Tomate orgânico", preco: 8, estoque: 45, unidade: "kg", categoria: "Hortaliças", imagem: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&h=400&fit=crop" },
+  { id: "p2", nome: "Mel artesanal", preco: 35, estoque: 12, unidade: "pote 500g", categoria: "Apicultura", imagem: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=400&fit=crop" },
+  { id: "p3", nome: "Ovos caipiras", preco: 22, estoque: 30, unidade: "dúzia", categoria: "Aves", imagem: "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=400&h=400&fit=crop" },
 ];
 
 const pedidosIniciais: Pedido[] = [
@@ -39,8 +39,8 @@ const pedidosIniciais: Pedido[] = [
 type Ctx = {
   produtos: Produto[];
   pedidos: Pedido[];
-  addProduto: (p: Omit<Produto, "id" | "emoji"> & { emoji?: string }) => void;
-  updateProduto: (id: string, p: Omit<Produto, "id" | "emoji"> & { emoji?: string }) => void;
+  addProduto: (p: Omit<Produto, "id" | "imagem"> & { imagem?: string }) => void;
+  updateProduto: (id: string, p: Omit<Produto, "id" | "imagem"> & { imagem?: string }) => void;
   deleteProduto: (id: string) => void;
   alterarStatusPedido: (id: string, status: StatusPedido) => void;
   addPedido: (pedido: Omit<Pedido, "id" | "data" | "status">) => void;
@@ -110,11 +110,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addProduto: (p) =>
       setProdutos((prev) => [
         ...prev,
-        { id: crypto.randomUUID(), emoji: p.emoji || "🌱", ...p },
+        { id: crypto.randomUUID(), ...p, imagem: p.imagem || "" },
       ]),
     updateProduto: (id, p) =>
       setProdutos((prev) =>
-        prev.map((x) => (x.id === id ? { ...x, ...p, emoji: p.emoji || x.emoji } : x)),
+        prev.map((x) => (x.id === id ? { ...x, ...p, imagem: p.imagem ?? x.imagem } : x)),
       ),
     deleteProduto: (id) => setProdutos((prev) => prev.filter((x) => x.id !== id)),
     alterarStatusPedido: (id, status) =>
