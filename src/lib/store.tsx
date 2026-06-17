@@ -52,7 +52,7 @@ const StoreContext = createContext<Ctx | null>(null);
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [produtos, setProdutos] = useState<Produto[]>(() => {
     try {
-      const saved = localStorage.getItem("@mr/produtos");
+      const saved = localStorage.getItem("@mr/produtos.v2");
       return saved ? JSON.parse(saved) : produtosIniciais;
     } catch {
       return produtosIniciais;
@@ -78,7 +78,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    localStorage.setItem("@mr/produtos", JSON.stringify(produtos));
+    localStorage.setItem("@mr/produtos.v2", JSON.stringify(produtos));
   }, [produtos]);
   
   useEffect(() => {
@@ -93,7 +93,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (e.key === "@mr/pedidos" && e.newValue) {
         setPedidos(JSON.parse(e.newValue));
       }
-      if (e.key === "@mr/produtos" && e.newValue) {
+      if (e.key === "@mr/produtos.v2" && e.newValue) {
         setProdutos(JSON.parse(e.newValue));
       }
       if (e.key === "@mr/vendas" && e.newValue) {
