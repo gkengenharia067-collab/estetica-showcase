@@ -107,7 +107,7 @@ function ProdutosPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {produtos.map((p) => (
           <article
-            key={p.id}
+            key={p.title}
             className="rounded-2xl bg-card border border-border overflow-hidden flex flex-col"
           >
             <div className="h-40 bg-accent/40 flex items-center justify-center overflow-hidden">
@@ -163,111 +163,113 @@ function ProdutosPage() {
                 <X className="size-5" />
               </button>
             </div>
-            <form onSubmit={save} className="p-6 space-y-4 overflow-y-auto">
-              <Field label="Nome do produto">
-                <input
-                  required
-                  value={form.nome}
-                  onChange={(e) => setForm({ ...form, nome: e.target.value })}
-                  className="input"
-                  placeholder="Ex.: Alface crespa"
-                />
-              </Field>
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="Preço (R$)">
+            <form onSubmit={save} className="flex flex-col flex-1 min-h-0">
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                <Field label="Nome do produto">
                   <input
                     required
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    value={form.preco}
-                    onChange={(e) => setForm({ ...form, preco: e.target.value })}
+                    value={form.nome}
+                    onChange={(e) => setForm({ ...form, nome: e.target.value })}
                     className="input"
-                    placeholder="0,00"
+                    placeholder="Ex.: Alface crespa"
                   />
                 </Field>
-                <Field label="Estoque">
+                <div className="grid grid-cols-2 gap-4">
+                  <Field label="Preço (R$)">
+                    <input
+                      required
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      value={form.preco}
+                      onChange={(e) => setForm({ ...form, preco: e.target.value })}
+                      className="input"
+                      placeholder="0,00"
+                    />
+                  </Field>
+                  <Field label="Estoque">
+                    <input
+                      required
+                      type="number"
+                      min={0}
+                      value={form.estoque}
+                      onChange={(e) => setForm({ ...form, estoque: e.target.value })}
+                      className="input"
+                      placeholder="0"
+                    />
+                  </Field>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <Field label="Unidade">
+                    <select
+                      value={form.unidade}
+                      onChange={(e) => setForm({ ...form, unidade: e.target.value })}
+                      className="input"
+                    >
+                      <option>kg</option>
+                      <option>dúzia</option>
+                      <option>pote 500g</option>
+                      <option>unidade</option>
+                      <option>maço</option>
+                      <option>litro</option>
+                    </select>
+                  </Field>
+                  <Field label="Categoria">
+                    <select
+                      value={form.categoria}
+                      onChange={(e) => setForm({ ...form, categoria: e.target.value })}
+                      className="input"
+                    >
+                      <option>Hortaliças</option>
+                      <option>Frutas</option>
+                      <option>Apicultura</option>
+                      <option>Aves</option>
+                      <option>Laticínios</option>
+                      <option>Grãos</option>
+                    </select>
+                  </Field>
+                </div>
+                <Field label="Galeria de imagens">
+                  <div className="grid grid-cols-5 gap-2">
+                    {galeriaImagens.map((g) => {
+                      const selecionada = form.imagem === g.url;
+                      return (
+                        <button
+                          type="button"
+                          key={g.url}
+                          onClick={() => setForm({ ...form, imagem: g.url })}
+                          title={g.nome}
+                          className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                            selecionada
+                              ? "border-primary ring-2 ring-primary/30"
+                              : "border-border hover:border-primary/60"
+                          }`}
+                        >
+                          <img src={g.url} alt={g.nome} className="w-full h-full object-cover" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </Field>
+                <Field label="URL da Imagem (opcional)">
                   <input
-                    required
-                    type="number"
-                    min={0}
-                    value={form.estoque}
-                    onChange={(e) => setForm({ ...form, estoque: e.target.value })}
+                    type="url"
+                    value={form.imagem}
+                    onChange={(e) => setForm({ ...form, imagem: e.target.value })}
                     className="input"
-                    placeholder="0"
+                    placeholder="https://exemplo.com/foto.jpg"
                   />
+                  <div className="mt-3 w-24 h-24 rounded-lg bg-accent/40 flex items-center justify-center overflow-hidden border border-border">
+                    {form.imagem ? (
+                      <img src={form.imagem} alt="Pré-visualização" className="w-full h-full object-cover" />
+                    ) : (
+                      <Camera className="size-8 text-muted-foreground" aria-hidden />
+                    )}
+                  </div>
                 </Field>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="Unidade">
-                  <select
-                    value={form.unidade}
-                    onChange={(e) => setForm({ ...form, unidade: e.target.value })}
-                    className="input"
-                  >
-                    <option>kg</option>
-                    <option>dúzia</option>
-                    <option>pote 500g</option>
-                    <option>unidade</option>
-                    <option>maço</option>
-                    <option>litro</option>
-                  </select>
-                </Field>
-                <Field label="Categoria">
-                  <select
-                    value={form.categoria}
-                    onChange={(e) => setForm({ ...form, categoria: e.target.value })}
-                    className="input"
-                  >
-                    <option>Hortaliças</option>
-                    <option>Frutas</option>
-                    <option>Apicultura</option>
-                    <option>Aves</option>
-                    <option>Laticínios</option>
-                    <option>Grãos</option>
-                  </select>
-                </Field>
-              </div>
-              <Field label="Galeria de imagens">
-                <div className="grid grid-cols-5 gap-2">
-                  {galeriaImagens.map((g) => {
-                    const selecionada = form.imagem === g.url;
-                    return (
-                      <button
-                        type="button"
-                        key={g.url}
-                        onClick={() => setForm({ ...form, imagem: g.url })}
-                        title={g.nome}
-                        className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                          selecionada
-                            ? "border-primary ring-2 ring-primary/30"
-                            : "border-border hover:border-primary/60"
-                        }`}
-                      >
-                        <img src={g.url} alt={g.nome} className="w-full h-full object-cover" />
-                      </button>
-                    );
-                  })}
-                </div>
-              </Field>
-              <Field label="URL da Imagem (opcional)">
-                <input
-                  type="url"
-                  value={form.imagem}
-                  onChange={(e) => setForm({ ...form, imagem: e.target.value })}
-                  className="input"
-                  placeholder="https://exemplo.com/foto.jpg"
-                />
-                <div className="mt-3 w-24 h-24 rounded-lg bg-accent/40 flex items-center justify-center overflow-hidden border border-border">
-                  {form.imagem ? (
-                    <img src={form.imagem} alt="Pré-visualização" className="w-full h-full object-cover" />
-                  ) : (
-                    <Camera className="size-8 text-muted-foreground" aria-hidden />
-                  )}
-                </div>
-              </Field>
 
-              <div className="flex gap-3 pt-2">
+              <div className="flex gap-3 p-6 pt-0 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
@@ -277,7 +279,7 @@ function ProdutosPage() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90"
+                  className="flex-1 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-weight font-semibold hover:bg-primary/90"
                 >
                   {editing ? "Salvar alterações" : "Adicionar produto"}
                 </button>
