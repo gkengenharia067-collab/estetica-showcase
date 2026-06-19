@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, Leaf, MapPin, ShieldCheck, Truck, ChevronRight, Info, X, CheckCircle2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useState } from "react";
@@ -12,14 +12,8 @@ function formatBRL(n: number) {
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-function getProductImage(nome: string) {
-  const map: Record<string, string> = {
-    "Tomate orgânico": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=1200&q=80",
-    "Mel artesanal": "https://images.unsplash.com/photo-1587049352851-8d4e89133924?auto=format&fit=crop&w=1200&q=80",
-    "Ovos caipiras": "https://images.unsplash.com/photo-1587486913049-53fc88980cfc?w=1200&q=80",
-  };
-  return map[nome] || "https://images.unsplash.com/photo-1595859703065-cc958019e07b?w=1200&q=80";
-}
+const FALLBACK_IMG = "https://images.unsplash.com/photo-1595859703065-cc958019e07b?w=1200&q=80";
+
 
 function getFullDescription(nome: string, categoria: string) {
   const map: Record<string, string> = {
@@ -32,8 +26,17 @@ function getFullDescription(nome: string, categoria: string) {
 
 function ProdutoDetalhesPage() {
   const { id } = Route.useParams();
+  const router = useRouter();
   const { produtos, addPedido } = useStore();
   const produto = produtos.find((p) => p.id === id);
+
+  const goBackToCatalogo = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.history.back();
+    } else {
+      router.navigate({ to: "/catalogo" });
+    }
+  };
 
   const [modalOpen, setModalOpen] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -79,13 +82,14 @@ function ProdutoDetalhesPage() {
       {/* Top Navbar */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link 
-            to="/catalogo" 
+          <button
+            type="button"
+            onClick={goBackToCatalogo}
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-medium text-sm"
           >
             <ArrowLeft className="size-4" />
             Catálogo
-          </Link>
+          </button>
           <div className="flex items-center gap-2.5">
             <div className="size-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center shadow-sm">
               <Leaf className="size-4" />
@@ -111,7 +115,7 @@ function ProdutoDetalhesPage() {
           {/* Product Image */}
           <div className="lg:w-1/2 relative min-h-[400px] lg:min-h-full bg-muted">
             <img 
-              src={getProductImage(produto.nome)} 
+              src={produto.imagem || FALLBACK_IMG} 
               alt={produto.nome}
               className="absolute inset-0 w-full h-full object-cover"
             />
@@ -233,6 +237,7 @@ function ProdutoDetalhesPage() {
                       setSuccess(false);
                       setModalOpen(false);
                       setForm({ cliente: "", whatsapp: "", quantidade: "1", observacao: "" });
+                      goBackToCatalogo();
                     }}
                     className="w-full bg-primary text-primary-foreground font-semibold py-3.5 rounded-xl hover:opacity-90 transition-colors"
                   >
@@ -258,7 +263,7 @@ function ProdutoDetalhesPage() {
                     
                     {/* Resumo */}
                     <div className="flex items-center gap-4 p-4 rounded-xl bg-accent/30 border border-border mb-2">
-                      <img src={getProductImage(produto.nome)} alt="" className="size-14 rounded-lg object-cover" />
+                      <img src={produto.imagem || FALLBACK_IMG} alt="" className="size-14 rounded-lg object-cover" />
                       <div>
                         <div className="font-semibold text-foreground">{produto.nome}</div>
                         <div className="text-sm text-muted-foreground">{formatBRL(produto.preco)} / {produto.unidade}</div>
