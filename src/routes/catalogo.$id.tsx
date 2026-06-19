@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, Leaf, MapPin, ShieldCheck, Truck, ChevronRight, Info, X, CheckCircle2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useState } from "react";
@@ -26,8 +26,17 @@ function getFullDescription(nome: string, categoria: string) {
 
 function ProdutoDetalhesPage() {
   const { id } = Route.useParams();
+  const router = useRouter();
   const { produtos, addPedido } = useStore();
   const produto = produtos.find((p) => p.id === id);
+
+  const goBackToCatalogo = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.history.back();
+    } else {
+      router.navigate({ to: "/catalogo" });
+    }
+  };
 
   const [modalOpen, setModalOpen] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -73,13 +82,14 @@ function ProdutoDetalhesPage() {
       {/* Top Navbar */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link 
-            to="/catalogo" 
+          <button
+            type="button"
+            onClick={goBackToCatalogo}
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-medium text-sm"
           >
             <ArrowLeft className="size-4" />
             Catálogo
-          </Link>
+          </button>
           <div className="flex items-center gap-2.5">
             <div className="size-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center shadow-sm">
               <Leaf className="size-4" />
@@ -227,6 +237,7 @@ function ProdutoDetalhesPage() {
                       setSuccess(false);
                       setModalOpen(false);
                       setForm({ cliente: "", whatsapp: "", quantidade: "1", observacao: "" });
+                      goBackToCatalogo();
                     }}
                     className="w-full bg-primary text-primary-foreground font-semibold py-3.5 rounded-xl hover:opacity-90 transition-colors"
                   >
