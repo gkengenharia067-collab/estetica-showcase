@@ -12,14 +12,8 @@ function formatBRL(n: number) {
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-function getProductImage(nome: string) {
-  const map: Record<string, string> = {
-    "Tomate orgânico": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=1200&q=80",
-    "Mel artesanal": "https://images.unsplash.com/photo-1587049352851-8d4e89133924?auto=format&fit=crop&w=1200&q=80",
-    "Ovos caipiras": "https://images.unsplash.com/photo-1587486913049-53fc88980cfc?w=1200&q=80",
-  };
-  return map[nome] || "https://images.unsplash.com/photo-1595859703065-cc958019e07b?w=1200&q=80";
-}
+const FALLBACK_IMG = "https://images.unsplash.com/photo-1595859703065-cc958019e07b?w=1200&q=80";
+
 
 function getFullDescription(nome: string, categoria: string) {
   const map: Record<string, string> = {
@@ -111,7 +105,7 @@ function ProdutoDetalhesPage() {
           {/* Product Image */}
           <div className="lg:w-1/2 relative min-h-[400px] lg:min-h-full bg-muted">
             <img 
-              src={getProductImage(produto.nome)} 
+              src={produto.imagem || FALLBACK_IMG} 
               alt={produto.nome}
               className="absolute inset-0 w-full h-full object-cover"
             />
@@ -258,7 +252,7 @@ function ProdutoDetalhesPage() {
                     
                     {/* Resumo */}
                     <div className="flex items-center gap-4 p-4 rounded-xl bg-accent/30 border border-border mb-2">
-                      <img src={getProductImage(produto.nome)} alt="" className="size-14 rounded-lg object-cover" />
+                      <img src={produto.imagem || FALLBACK_IMG} alt="" className="size-14 rounded-lg object-cover" />
                       <div>
                         <div className="font-semibold text-foreground">{produto.nome}</div>
                         <div className="text-sm text-muted-foreground">{formatBRL(produto.preco)} / {produto.unidade}</div>

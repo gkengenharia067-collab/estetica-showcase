@@ -11,14 +11,8 @@ function formatBRL(n: number) {
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-function getProductImage(nome: string) {
-  const map: Record<string, string> = {
-    "Tomate orgânico": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800&q=80",
-    "Mel artesanal": "https://images.unsplash.com/photo-1587049352851-8d4e89133924?auto=format&fit=crop&w=1200&q=80",
-    "Ovos caipiras": "https://images.unsplash.com/photo-1587486913049-53fc88980cfc?w=800&q=80",
-  };
-  return map[nome] || "https://images.unsplash.com/photo-1595859703065-cc958019e07b?w=800&q=80";
-}
+const FALLBACK_IMG = "https://images.unsplash.com/photo-1595859703065-cc958019e07b?w=800&q=80";
+
 
 function getShortDescription(categoria: string) {
   const map: Record<string, string> = {
@@ -118,7 +112,7 @@ function CatalogoPage() {
               >
                 <div className="relative h-56 bg-muted overflow-hidden">
                   <img 
-                    src={getProductImage(p.nome)} 
+                    src={p.imagem || FALLBACK_IMG} 
                     alt={p.nome} 
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
