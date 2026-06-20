@@ -227,7 +227,7 @@ function CatalogoPage() {
           </div>
         </section>
       </main>
-      <FloatingWhatsApp />
+      {!cartOpen && <FloatingWhatsApp />}
     </div>
   );
 }
