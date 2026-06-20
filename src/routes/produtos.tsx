@@ -251,10 +251,31 @@ function ProdutosPage() {
                     })}
                   </div>
                 </Field>
+                <Field label="Enviar imagem do dispositivo">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        if (typeof reader.result === "string") {
+                          setForm((f) => ({ ...f, imagem: reader.result as string }));
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                    className="block w-full text-sm text-foreground file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:font-semibold hover:file:opacity-90 cursor-pointer"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1.5">
+                    Ou cole uma URL no campo abaixo.
+                  </p>
+                </Field>
                 <Field label="URL da Imagem (opcional)">
                   <input
                     type="url"
-                    value={form.imagem}
+                    value={form.imagem.startsWith("data:") ? "" : form.imagem}
                     onChange={(e) => setForm({ ...form, imagem: e.target.value })}
                     className="input"
                     placeholder="https://exemplo.com/foto.jpg"

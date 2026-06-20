@@ -83,7 +83,7 @@ function ProdutoDetalhesPage() {
             </div>
             <div className="font-display font-semibold text-lg text-foreground tracking-tight">Terra Viva</div>
           </div>
-          <div className="w-20" /> {/* Spacer */}
+          <CartDrawer />
         </div>
       </header>
 
@@ -248,7 +248,6 @@ function ProdutoDetalhesPage() {
         </div>
       </main>
       <FloatingWhatsApp />
-      <CartDrawer />
     </div>
   );
 }
