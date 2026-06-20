@@ -254,7 +254,7 @@ function ProdutoDetalhesPage() {
           </div>
         </div>
       </main>
-      <FloatingWhatsApp />
+      {!cartOpen && <FloatingWhatsApp />}
     </div>
   );
 }
