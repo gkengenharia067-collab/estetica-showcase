@@ -42,22 +42,24 @@ export function CartDrawer() {
 
   return (
     <>
-      {/* Floating cart button */}
+      {/* Inline cart trigger */}
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed bottom-24 right-6 z-40 flex items-center gap-2 px-4 h-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl hover:scale-105 transition-all font-semibold"
+        className="inline-flex items-center gap-2 px-4 h-11 rounded-full bg-primary text-primary-foreground shadow-sm hover:shadow-md hover:opacity-95 transition-all font-semibold"
         aria-label="Abrir sacola"
       >
         <div className="relative">
-          <ShoppingBag className="size-6" />
-          {totalItens > 0 && (
+          <ShoppingBag className="size-5" />
+          {mounted && totalItens > 0 && (
             <span className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full size-5 flex items-center justify-center border-2 border-primary">
               {totalItens}
             </span>
           )}
         </div>
-        <span className="text-sm whitespace-nowrap">Sacola ({totalItens} {totalItens === 1 ? "item" : "itens"})</span>
+        <span className="text-sm whitespace-nowrap">
+          Sacola{mounted ? ` (${totalItens} ${totalItens === 1 ? "item" : "itens"})` : ""}
+        </span>
       </button>
 
       {open && (
