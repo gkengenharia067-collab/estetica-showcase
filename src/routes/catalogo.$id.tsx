@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, Leaf, MapPin, ShieldCheck, Truck, ChevronRight, Info, Plus, Minus, ShoppingBag, CheckCircle2 } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { CartDrawer } from "@/components/CartDrawer";
 
@@ -42,6 +42,8 @@ function ProdutoDetalhesPage() {
   const [qtd, setQtd] = useState(1);
   const [added, setAdded] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const itemNoCarrinho = cart.find((c) => c.id === id);
 
   if (!produto) {
@@ -87,11 +89,9 @@ function ProdutoDetalhesPage() {
         </div>
       </header>
 
-      {/* Cart bar */}
-      <div className="bg-card border-b border-border">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex justify-end">
-          <CartDrawer onOpenChange={setCartOpen} />
-        </div>
+      {/* Cart inline */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 flex justify-end">
+        <CartDrawer onOpenChange={setCartOpen} />
       </div>
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 md:py-12 relative">
@@ -219,7 +219,7 @@ function ProdutoDetalhesPage() {
                       <Plus className="size-4" />
                     </button>
                   </div>
-                  {itemNoCarrinho && (
+                  {mounted && itemNoCarrinho && (
                     <span className="text-xs text-muted-foreground">
                       {itemNoCarrinho.quantidade} já na sacola
                     </span>
