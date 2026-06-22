@@ -219,7 +219,7 @@ function ProdutoDetalhesPage() {
                       <Plus className="size-4" />
                     </button>
                   </div>
-                  {itemNoCarrinho && (
+                  {mounted && itemNoCarrinho && (
                     <span className="text-xs text-muted-foreground">
                       {itemNoCarrinho.quantidade} já na sacola
                     </span>
