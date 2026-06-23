@@ -3,7 +3,6 @@ import { ArrowLeft, Leaf, MapPin, ShieldCheck, Truck, ChevronRight, Info, Plus, 
 import { useStore } from "@/lib/store";
 import { useState, useEffect } from "react";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
-import { CartDrawer } from "@/components/CartDrawer";
 
 export const Route = createFileRoute("/catalogo/$id")({
   component: ProdutoDetalhesPage,
@@ -14,7 +13,6 @@ function formatBRL(n: number) {
 }
 
 const FALLBACK_IMG = "https://images.unsplash.com/photo-1595859703065-cc958019e07b?w=1200&q=80";
-
 
 function getFullDescription(nome: string, categoria: string) {
   const map: Record<string, string> = {
@@ -65,8 +63,6 @@ function ProdutoDetalhesPage() {
     setTimeout(() => setAdded(false), 2000);
   }
 
-
-
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
       {/* Top Navbar */}
@@ -88,11 +84,6 @@ function ProdutoDetalhesPage() {
           </div>
         </div>
       </header>
-
-      {/* Cart inline */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 flex justify-end">
-        <CartDrawer onOpenChange={setCartOpen} />
-      </div>
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 md:py-12 relative">
         {/* Breadcrumb */}
