@@ -119,9 +119,12 @@ function CatalogoPage() {
               >
                 <div className="relative h-56 bg-muted overflow-hidden">
                   <img 
-                    src={p.imagem || FALLBACK_IMG} 
+                    src={p.imagem || FALLBACK_IMG}  
                     alt={p.nome} 
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    onError={(e) => {
+                      e.currentTarget.src = FALLBACK_IMG;
+                      }}
                   />
                   {p.estoque === 0 && (
                     <div className="absolute inset-0 bg-background/60 flex items-center justify-center backdrop-blur-[2px]">
