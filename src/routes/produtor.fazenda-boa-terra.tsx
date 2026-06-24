@@ -15,33 +15,25 @@ function formatBRL(n: number) {
 const FALLBACK_IMG = "https://images.unsplash.com/photo-1595859703065-cc958019e07b?w=800&q=80";
 
 function ProdutorPerfilPage() {
-  // 🔥 Pega os produtos do store (que é a fonte única de verdade)
   const { produtos } = useStore();
-
-  // 🔥 Estado local para garantir que a página reaja às mudanças
   const [produtosLocal, setProdutosLocal] = useState(produtos);
 
-  // 🔥 Sincroniza sempre que o store mudar
   useEffect(() => {
     setProdutosLocal(produtos);
   }, [produtos]);
 
-  // 🔥 Recarrega diretamente do localStorage para garantir
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('@mr/produtos.v2');
-      if (saved) {
+    const saved = localStorage.getItem('@mr/produtos.v2');
+    if (saved) {
+      try {
         const parsed = JSON.parse(saved);
         if (parsed.length > 0) {
           setProdutosLocal(parsed);
         }
-      }
-    } catch (e) {
-      console.error("Erro ao carregar produtos do localStorage:", e);
+      } catch {}
     }
   }, []);
 
-  // Se não houver produtos, mostra loading
   if (!produtosLocal || produtosLocal.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -52,7 +44,6 @@ function ProdutorPerfilPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Top Navbar */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/catalogo" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-medium text-sm">
@@ -68,30 +59,19 @@ function ProdutorPerfilPage() {
         </div>
       </header>
 
-      {/* Capa e Perfil */}
       <div className="relative bg-card border-b border-border">
         <div className="h-64 md:h-80 w-full overflow-hidden bg-muted">
-          <img 
-            src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=2000&q=80" 
-            alt="Capa da Fazenda" 
-            className="w-full h-full object-cover opacity-90"
-          />
+          <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=2000&q=80" alt="Capa da Fazenda" className="w-full h-full object-cover opacity-90" />
         </div>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 relative pb-8">
           <div className="flex flex-col md:flex-row md:items-end gap-6 md:gap-8 -mt-20 md:-mt-24 relative z-10 mb-6">
-            <img 
-              src="https://images.unsplash.com/photo-1589923188900-85dae523342b?w=400&h=400&fit=crop&q=80" 
-              alt="Perfil da Fazenda Boa Terra"
-              className="size-36 md:size-48 rounded-3xl border-4 border-background shadow-xl object-cover bg-muted"
-            />
+            <img src="https://images.unsplash.com/photo-1589923188900-85dae523342b?w=400&h=400&fit=crop&q=80" alt="Perfil da Fazenda Boa Terra" className="size-36 md:size-48 rounded-3xl border-4 border-background shadow-xl object-cover bg-muted" />
             <div className="flex-1 pb-2 mt-4 md:mt-0">
               <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
                 <ShieldCheck className="size-4" />
                 Produtor Verificado
               </div>
-              <h1 className="text-3xl md:text-5xl font-display font-bold text-foreground tracking-tight">
-                Fazenda Boa Terra
-              </h1>
+              <h1 className="text-3xl md:text-5xl font-display font-bold text-foreground tracking-tight">Fazenda Boa Terra</h1>
               <div className="flex flex-wrap items-center gap-4 text-muted-foreground mt-3 font-medium">
                 <span className="flex items-center gap-1.5">
                   <MapPin className="size-5 text-primary" /> Serra do Vale, MG
@@ -120,15 +100,7 @@ function ProdutorPerfilPage() {
           <section className="bg-card rounded-3xl p-8 border border-border shadow-sm">
             <h2 className="text-2xl font-display font-bold text-foreground mb-4">Nossa História</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
-              <p>
-                A Fazenda Boa Terra começou como um sonho de família em 1998. Nossa missão sempre foi produzir alimentos saudáveis, respeitando o tempo da natureza e os ciclos do solo. Ao longo das décadas, passamos a adotar técnicas 100% orgânicas, abandonando o uso de qualquer defensivo químico.
-              </p>
-              <p>
-                Hoje, somos referência na região da Serra do Vale em sustentabilidade e produção consciente. Cultivamos hortaliças fresquinhas, mantemos nossas galinhas felizes e livres, e cuidamos de nossas abelhas nativas para produzir um mel puro e artesanal.
-              </p>
-              <p>
-                Acreditamos que a comida de verdade deve chegar fresca à mesa das pessoas. É por isso que abrimos nossas portas virtuais aqui na Terra Viva: para conectar nossa família à sua, sem intermediários.
-              </p>
+              <p>A Fazenda Boa Terra começou como um sonho de família em 1998...</p>
             </div>
           </section>
 
@@ -179,10 +151,10 @@ function ProdutorPerfilPage() {
                   className="group flex gap-4 bg-card rounded-2xl p-4 border border-border hover:border-primary/50 transition-all hover:shadow-md"
                 >
                   <div className="size-24 rounded-xl overflow-hidden shrink-0 bg-muted">
-                    <img 
-                      src={p.imagem || p.image || FALLBACK_IMG} 
-                      alt={p.nome} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                    <img
+                      src={p.imagem || FALLBACK_IMG}
+                      alt={p.nome}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
                   <div className="flex flex-col justify-center">
@@ -195,7 +167,6 @@ function ProdutorPerfilPage() {
                 </Link>
               ))}
             </div>
-
             <div className="mt-8 text-center">
               <Link to="/catalogo" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border-2 border-border text-foreground font-bold hover:bg-muted transition-colors">
                 Explorar catálogo completo da Terra Viva
