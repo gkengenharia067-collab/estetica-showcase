@@ -16,55 +16,31 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1595859703065-cc958019e0
 
 function ProdutorPerfilPage() {
   const { produtos } = useStore();
-  const [produtosLocal, setProdutosLocal] = useState<Produto[]>([]);
+  const [produtosLocal, setProdutosLocal] = useState<Produto[]>(produtos);
   const [mounted, setMounted] = useState(false);
 
-  // 🔥 Só executa no cliente (depois da montagem)
+  // 🔥 Carrega do localStorage APENAS no cliente
   useEffect(() => {
     setMounted(true);
-    const saved = localStorage.getItem('@mr/produtos.v2');
-    if (saved) {
-      try {
+    try {
+      const saved = localStorage.getItem('@mr/produtos.v2');
+      if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           setProdutosLocal(parsed);
           return;
         }
-      } catch (e) {
-        console.error("Erro ao carregar produtos do localStorage:", e);
       }
+    } catch (e) {
+      console.error("Erro ao carregar produtos do localStorage:", e);
     }
     setProdutosLocal(produtos);
   }, [produtos]);
 
-  // Se não estiver montado (servidor), renderiza um placeholder ou nada
-  if (!mounted) {
-    return (
-      <div className="min-h-screen bg-background pb-20">
-        {/* Apenas o header e a estrutura básica para não quebrar a hidratação */}
-        <header className="bg-card border-b border-border sticky top-0 z-50">
-          <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-            <Link to="/catalogo" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-medium text-sm">
-              <ArrowLeft className="size-4" />
-              Voltar ao Catálogo
-            </Link>
-            <div className="flex items-center gap-2">
-              <div className="size-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center shadow-sm">
-                <Leaf className="size-4" />
-              </div>
-              <div className="font-display font-semibold text-lg text-foreground tracking-tight">Terra Viva</div>
-            </div>
-          </div>
-        </header>
-        <main className="max-w-5xl mx-auto px-4 sm:px-6 mt-10">
-          <div className="text-center text-muted-foreground">Carregando produtos...</div>
-        </main>
-      </div>
-    );
-  }
+  // 🔥 Usa produtos do store no servidor, e do localStorage no cliente
+  const produtosExibir = mounted ? produtosLocal : produtos;
 
-  // 🔥 Renderização completa (apenas no cliente)
-  if (produtosLocal.length === 0) {
+  if (!produtosExibir || produtosExibir.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center text-muted-foreground">Carregando produtos...</div>
@@ -163,7 +139,7 @@ function ProdutorPerfilPage() {
           <section id="produtos" className="pt-4">
             <h2 className="text-2xl font-display font-bold text-foreground mb-6">Produtos Disponíveis</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {produtosLocal.map((p) => (
+              {produtosExibir.map((p) => (
                 <Link
                   key={p.id}
                   to="/catalogo/$id"
