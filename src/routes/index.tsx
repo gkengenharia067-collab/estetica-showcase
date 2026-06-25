@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, ShoppingBag, Leaf, Save, CheckCircle, Upload } from "lucide-react";
+import { Plus, ShoppingBag, Leaf, Save, CheckCircle, Upload, Link2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useState, useEffect, useRef } from "react";
 
@@ -150,7 +150,7 @@ function DashboardPage() {
           </Link>
         </div>
 
-        {/* Card "Minha Fazenda" com upload de logo e capa */}
+        {/* Card "Minha Fazenda" com upload + URL para logo e capa */}
         <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-display font-bold text-foreground">Minha Fazenda</h2>
@@ -216,63 +216,89 @@ function DashboardPage() {
             />
           </div>
 
-          {/* 🔥 Upload de Logo */}
+          {/* 🔥 LOGO – URL + Upload */}
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">Logo da fazenda</label>
-              <div className="flex items-center gap-4">
-                <button
-                  type="button"
-                  onClick={() => logoInputRef.current?.click()}
-                  className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-xl hover:bg-muted transition-all"
-                >
-                  <Upload className="size-4" />
-                  Escolher logo
-                </button>
-                <input
-                  ref={logoInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  className="hidden"
-                />
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <Link2 className="size-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={fazenda.logo?.startsWith('data:') ? '' : fazenda.logo || ''}
+                    onChange={(e) => setFazenda({ ...fazenda, logo: e.target.value })}
+                    className="flex-1 border border-border rounded-xl bg-background px-4 py-2 outline-none focus:border-primary text-sm"
+                    placeholder="URL da logo (ex: https://...)"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Upload className="size-4 text-muted-foreground" />
+                  <button
+                    type="button"
+                    onClick={() => logoInputRef.current?.click()}
+                    className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-xl hover:bg-muted transition-all text-sm"
+                  >
+                    Escolher arquivo
+                  </button>
+                  <input
+                    ref={logoInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="hidden"
+                  />
+                  {fazenda.logo && (
+                    <span className="text-sm text-green-600">✓</span>
+                  )}
+                </div>
                 {fazenda.logo && (
-                  <span className="text-sm text-green-600">Logo carregada</span>
+                  <div className="mt-2">
+                    <img src={fazenda.logo} alt="Logo" className="h-12 w-auto object-contain" />
+                  </div>
                 )}
               </div>
-              {fazenda.logo && (
-                <div className="mt-2">
-                  <img src={fazenda.logo} alt="Logo" className="h-12 w-auto object-contain" />
-                </div>
-              )}
             </div>
+
+            {/* 🔥 CAPA – URL + Upload */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">Foto de capa</label>
-              <div className="flex items-center gap-4">
-                <button
-                  type="button"
-                  onClick={() => capaInputRef.current?.click()}
-                  className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-xl hover:bg-muted transition-all"
-                >
-                  <Upload className="size-4" />
-                  Escolher capa
-                </button>
-                <input
-                  ref={capaInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleCapaUpload}
-                  className="hidden"
-                />
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <Link2 className="size-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={fazenda.capa?.startsWith('data:') ? '' : fazenda.capa || ''}
+                    onChange={(e) => setFazenda({ ...fazenda, capa: e.target.value })}
+                    className="flex-1 border border-border rounded-xl bg-background px-4 py-2 outline-none focus:border-primary text-sm"
+                    placeholder="URL da capa (ex: https://...)"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Upload className="size-4 text-muted-foreground" />
+                  <button
+                    type="button"
+                    onClick={() => capaInputRef.current?.click()}
+                    className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-xl hover:bg-muted transition-all text-sm"
+                  >
+                    Escolher arquivo
+                  </button>
+                  <input
+                    ref={capaInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCapaUpload}
+                    className="hidden"
+                  />
+                  {fazenda.capa && (
+                    <span className="text-sm text-green-600">✓</span>
+                  )}
+                </div>
                 {fazenda.capa && (
-                  <span className="text-sm text-green-600">Capa carregada</span>
+                  <div className="mt-2">
+                    <img src={fazenda.capa} alt="Capa" className="h-20 w-full object-cover rounded-xl" />
+                  </div>
                 )}
               </div>
-              {fazenda.capa && (
-                <div className="mt-2">
-                  <img src={fazenda.capa} alt="Capa" className="h-20 w-full object-cover rounded-xl" />
-                </div>
-              )}
             </div>
           </div>
 
