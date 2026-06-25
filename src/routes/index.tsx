@@ -1,245 +1,191 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Leaf, MapPin, ShieldCheck, Truck, Plus, ArrowLeft } from "lucide-react";
-import { useState, useEffect } from "react";
-import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
-import { CartDrawer } from "@/components/CartDrawer";
+import { Plus, ShoppingBag, Leaf, Save, CheckCircle } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { useState, useEffect } from "react";
 
-export const Route = createFileRoute("/catalogo/")({
-  component: CatalogoPage,
+export const Route = createFileRoute("/")({
+  component: DashboardPage,
 });
 
 function formatBRL(n: number) {
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-const FALLBACK_IMG = "https://images.unsplash.com/photo-1595859703065-cc958019e07b?w=800&q=80";
+function DashboardPage() {
+  const { produtos, pedidos } = useStore();
 
-function getFazenda() {
-  try {
-    const saved = localStorage.getItem('@mr/fazenda');
-    return saved ? JSON.parse(saved) : { nome: 'Terra Viva', cidade: 'Serra do Vale, MG', descricao: '', whatsapp: '' };
-  } catch {
-    return { nome: 'Terra Viva', cidade: 'Serra do Vale, MG', descricao: '', whatsapp: '' };
-  }
-}
+  const [fazenda, setFazenda] = useState(() => {
+    try {
+      const saved = localStorage.getItem('@mr/fazenda');
+      return saved ? JSON.parse(saved) : { nome: '', telefone: '', cidade: '', descricao: '', whatsapp: '' };
+    } catch {
+      return { nome: '', telefone: '', cidade: '', descricao: '', whatsapp: '' };
+    }
+  });
 
-function getShortDescription(categoria: string) {
-  const map: Record<string, string> = {
-    "Hortaliças": "Colhido no dia, livre de agrotóxicos.",
-    "Apicultura": "Puro, cru e processado artesanalmente.",
-    "Aves": "Galinhas criadas soltas com alimentação natural.",
+  const [salvo, setSalvo] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('@mr/fazenda', JSON.stringify(fazenda));
+  }, [fazenda]);
+
+  useEffect(() => {
+    if (salvo) {
+      const timer = setTimeout(() => setSalvo(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [salvo]);
+
+  const totalProdutos = produtos.length;
+  const pedidosPendentes = pedidos.filter(p => p.status === "Pendente").length;
+  const totalVendas = pedidos.reduce((acc, p) => acc + p.valor, 0);
+
+  const handleSave = () => {
+    localStorage.setItem('@mr/fazenda', JSON.stringify(fazenda));
+    setSalvo(true);
   };
-  return map[categoria] || "Produto fresco direto da fazenda para sua mesa.";
-}
-
-function CatalogoPage() {
-  const { produtos, addToCart } = useStore();
-  const [cartOpen, setCartOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  const fazenda = getFazenda();
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Navbar */}
+      {/* Header com navegação e botão "Ver minha loja" */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="size-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-sm">
               <Leaf className="size-5" />
             </div>
-            <div className="font-display font-bold text-xl text-foreground tracking-tight">{fazenda.nome}</div>
+            <div className="font-display font-bold text-xl text-foreground tracking-tight">Terra Viva</div>
           </div>
           <nav className="hidden sm:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-            <Link to="/" className="flex items-center gap-2 text-primary font-semibold hover:opacity-80 transition-all">
-              <ArrowLeft className="size-4" />
-              Voltar ao painel
+            <Link to="/" className="text-primary font-semibold">Dashboard</Link>
+            <Link to="/pedidos" className="hover:text-foreground cursor-pointer transition-colors">Pedidos</Link>
+            <Link to="/produtos" className="hover:text-foreground cursor-pointer transition-colors">Meus Produtos</Link>
+            {/* 🔥 BOTÃO "MINHA FAZENDA" REMOVIDO */}
+            <Link to="/catalogo" className="bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-bold hover:opacity-90 transition-all shadow-sm">
+              Ver minha loja
             </Link>
-            <Link to="/catalogo" className="text-primary font-semibold">Início</Link>
-            <a href="#produtos" className="hover:text-foreground cursor-pointer transition-colors">Produtos</a>
-            <Link to="/produtor/fazenda-boa-terra" className="hover:text-foreground cursor-pointer transition-colors">Sobre a Fazenda</Link>
-            <a href="#contato" className="hover:text-foreground cursor-pointer transition-colors">Contato</a>
           </nav>
         </div>
       </header>
 
-      {/* 🔥 SACOLA STICKY NO TOPO */}
-      <CartDrawer onOpenChange={setCartOpen} />
-
-      <main>
-        {/* Hero Section */}
-        <section className="relative bg-card border-b border-border overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <img 
-              src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=2000&q=80" 
-              alt="Capa da Fazenda" 
-              className="w-full h-full object-cover opacity-20"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-card via-card/80 to-transparent" />
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        {/* Cards de resumo */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-muted-foreground">Produtos cadastrados</h3>
+              <ShoppingBag className="size-5 text-primary" />
+            </div>
+            <p className="text-3xl font-display font-bold text-foreground">{totalProdutos}</p>
           </div>
-          
-          <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-24 text-center">
-            <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-6">
-              Produtor Verificado
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-muted-foreground">Pedidos pendentes</h3>
+              <ShoppingBag className="size-5 text-primary" />
             </div>
-            <h1 className="text-4xl md:text-6xl font-display font-bold text-foreground mb-6 tracking-tight">
-              {fazenda.nome}
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              {fazenda.descricao || "Cultivando saúde e sabor desde 1998. Levamos até a sua mesa alimentos frescos, sustentáveis e repletos de carinho, direto de nossa propriedade na Serra do Vale."}
-            </p>
-            
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-6 sm:gap-12 text-sm text-foreground font-medium">
-              <div className="flex items-center gap-2">
-                <MapPin className="size-5 text-primary" />
-                {fazenda.cidade || "Serra do Vale, MG"}
-              </div>
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="size-5 text-primary" />
-                Produção Própria
-              </div>
-              <div className="flex items-center gap-2">
-                <Truck className="size-5 text-primary" />
-                Entrega Semanal
-              </div>
-            </div>
-
-            <div className="mt-10">
-              <Link 
-                to="/produtor/fazenda-boa-terra"
-                className="inline-flex items-center justify-center px-8 py-3.5 rounded-full bg-primary text-primary-foreground font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all"
-              >
-                Conhecer a Fazenda
-              </Link>
-            </div>
+            <p className="text-3xl font-display font-bold text-foreground">{pedidosPendentes}</p>
           </div>
-        </section>
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-muted-foreground">Vendas do período</h3>
+              <ShoppingBag className="size-5 text-primary" />
+            </div>
+            <p className="text-3xl font-display font-bold text-foreground">{formatBRL(totalVendas)}</p>
+          </div>
+        </div>
 
-        {/* Product Catalog */}
-        <section id="produtos" className="max-w-6xl mx-auto px-4 sm:px-6 py-16 scroll-mt-20">
-          <div className="flex items-end justify-between mb-10">
+        {/* Atalhos rápidos */}
+        <div className="flex flex-wrap gap-4 mb-8">
+          <Link
+            to="/produtos"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold hover:opacity-90 transition-all shadow-sm"
+          >
+            <Plus className="size-5" />
+            Adicionar Produto
+          </Link>
+          <Link
+            to="/pedidos"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-card border border-border rounded-xl font-bold hover:bg-muted transition-all"
+          >
+            <ShoppingBag className="size-5" />
+            Ver Pedidos
+          </Link>
+        </div>
+
+        {/* Card "Minha Fazenda" */}
+        <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-display font-bold text-foreground">Minha Fazenda</h2>
+            {salvo && (
+              <span className="flex items-center gap-1 text-green-600 text-sm font-medium">
+                <CheckCircle className="size-4" />
+                Dados salvos!
+              </span>
+            )}
+          </div>
+          <p className="text-muted-foreground text-sm mb-4">Preencha os dados da sua propriedade para aparecer na loja.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground">Nossos Produtos</h2>
-              <p className="text-muted-foreground mt-2">Colhidos e preparados especialmente para você.</p>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Nome da fazenda</label>
+              <input
+                type="text"
+                value={fazenda.nome}
+                onChange={(e) => setFazenda({ ...fazenda, nome: e.target.value })}
+                className="w-full border border-border rounded-xl bg-background px-4 py-3 outline-none focus:border-primary"
+                placeholder="Ex: Fazenda Boa Terra"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Telefone</label>
+              <input
+                type="text"
+                value={fazenda.telefone}
+                onChange={(e) => setFazenda({ ...fazenda, telefone: e.target.value })}
+                className="w-full border border-border rounded-xl bg-background px-4 py-3 outline-none focus:border-primary"
+                placeholder="(00) 0000-0000"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Cidade</label>
+              <input
+                type="text"
+                value={fazenda.cidade}
+                onChange={(e) => setFazenda({ ...fazenda, cidade: e.target.value })}
+                className="w-full border border-border rounded-xl bg-background px-4 py-3 outline-none focus:border-primary"
+                placeholder="Ex: Campo Grande - MS"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">WhatsApp</label>
+              <input
+                type="text"
+                value={fazenda.whatsapp}
+                onChange={(e) => setFazenda({ ...fazenda, whatsapp: e.target.value })}
+                className="w-full border border-border rounded-xl bg-background px-4 py-3 outline-none focus:border-primary"
+                placeholder="(00) 00000-0000"
+              />
             </div>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-            {mounted && produtos.map((p) => (
-              <article
-                key={p.id}
-                className="group flex flex-col bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-              >
-                <div className="relative h-56 bg-muted overflow-hidden">
-                  <img 
-                    src={p.imagem || FALLBACK_IMG} 
-                    alt={p.nome} 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  {p.estoque === 0 && (
-                    <div className="absolute inset-0 bg-background/60 flex items-center justify-center backdrop-blur-[2px]">
-                      <span className="bg-destructive text-destructive-foreground px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide">
-                        Esgotado
-                      </span>
-                    </div>
-                  )}
-                  <div className="absolute top-3 left-3">
-                    <span className="bg-card/90 backdrop-blur-sm text-foreground text-xs font-semibold px-2.5 py-1 rounded-md shadow-sm">
-                      {p.categoria}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="p-5 flex-1 flex flex-col">
-                  <h3 className="text-lg font-bold text-foreground leading-tight group-hover:text-primary transition-colors">
-                    {p.nome}
-                  </h3>
-                  
-                  <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                    {getShortDescription(p.categoria)}
-                  </p>
-
-                  <div className="mt-auto pt-5">
-                    <div className="flex items-end gap-1 mb-4">
-                      <span className="text-2xl font-display font-bold text-primary">
-                        {formatBRL(p.preco)}
-                      </span>
-                      <span className="text-sm text-muted-foreground font-medium mb-1">
-                        / {p.unidade}
-                      </span>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Link
-                        to="/catalogo/$id"
-                        params={{ id: p.id }}
-                        className="flex-1 inline-flex items-center justify-center px-3 py-3 rounded-xl font-semibold border border-border hover:bg-muted transition-all text-sm"
-                      >
-                        Detalhes
-                      </Link>
-                      <button
-                        type="button"
-                        disabled={p.estoque === 0}
-                        onClick={() => addToCart(p, 1)}
-                        className={`flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-3 rounded-xl font-semibold transition-all text-sm ${
-                          p.estoque > 0
-                            ? "bg-primary text-primary-foreground hover:opacity-90 shadow-sm hover:shadow-md"
-                            : "bg-muted text-muted-foreground cursor-not-allowed"
-                        }`}
-                      >
-                        <Plus className="size-4" />
-                        {p.estoque > 0 ? "Sacola" : "Indisponível"}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            ))}
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-foreground mb-1.5">Descrição</label>
+            <textarea
+              value={fazenda.descricao}
+              onChange={(e) => setFazenda({ ...fazenda, descricao: e.target.value })}
+              className="w-full border border-border rounded-xl bg-background px-4 py-3 outline-none focus:border-primary resize-none h-24"
+              placeholder="Conte um pouco sobre sua fazenda..."
+            />
           </div>
-        </section>
-
-        {/* Contact Section */}
-        <section id="contato" className="bg-card border-t border-border mt-10 scroll-mt-16">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-20">
-            <div className="text-center mb-12">
-              <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground">Entre em Contato</h2>
-              <p className="text-muted-foreground mt-2">Fale diretamente com a fazenda para dúvidas ou encomendas especiais.</p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <a href={`https://wa.me/55${fazenda.whatsapp || '67999222720'}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center text-center p-8 rounded-3xl bg-muted/30 border border-border hover:bg-muted/50 hover:border-primary/50 transition-all cursor-pointer">
-                <div className="size-14 rounded-2xl bg-[#25D366]/10 text-[#25D366] flex items-center justify-center mb-5">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                </div>
-                <h3 className="font-bold text-lg text-foreground mb-1">WhatsApp</h3>
-                <p className="text-muted-foreground">{fazenda.whatsapp ? `+55 ${fazenda.whatsapp}` : '+55 67 99922-2720'}</p>
-                <p className="text-sm text-[#25D366] font-medium mt-2">Respostas em até 2 horas</p>
-              </a>
-
-              <div className="flex flex-col items-center text-center p-8 rounded-3xl bg-muted/30 border border-border">
-                <div className="size-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-5">
-                  <MapPin className="size-7" />
-                </div>
-                <h3 className="font-bold text-lg text-foreground mb-1">Localização</h3>
-                <p className="text-muted-foreground">{fazenda.cidade || "Serra do Vale, MG"}</p>
-                <p className="text-sm text-muted-foreground mt-2">Estrada do Vale, Km 12</p>
-              </div>
-
-              <div className="flex flex-col items-center text-center p-8 rounded-3xl bg-muted/30 border border-border">
-                <div className="size-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-5">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                </div>
-                <h3 className="font-bold text-lg text-foreground mb-1">Atendimento</h3>
-                <p className="text-muted-foreground">Segunda a Sexta: 08h às 18h</p>
-                <p className="text-sm text-muted-foreground mt-2">Sábados: 08h às 12h</p>
-              </div>
-            </div>
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={handleSave}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold hover:opacity-90 transition-all shadow-sm"
+            >
+              <Save className="size-5" />
+              Salvar dados
+            </button>
           </div>
-        </section>
+        </div>
       </main>
-      {!cartOpen && <FloatingWhatsApp />}
     </div>
   );
 }
