@@ -12,7 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { StoreProvider } from "../lib/store";
-import { CartDrawer } from "@/components/CartDrawer";
+import { CartDrawer } from "@/components/CartDrawer"; // 🔥 ADICIONADO
 
 function NotFoundComponent() {
   return (
@@ -127,7 +127,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <StoreProvider>
         <Outlet />
-        <CartDrawer />
+        <CartDrawer /> {/* 🔥 ADICIONADO */}
       </StoreProvider>
     </QueryClientProvider>
   );
