@@ -14,7 +14,6 @@ function formatBRL(n: number) {
 function DashboardPage() {
   const { produtos, pedidos } = useStore();
 
-  // 🔥 Estado para os dados da fazenda (persistido no localStorage)
   const [fazenda, setFazenda] = useState(() => {
     try {
       const saved = localStorage.getItem('@mr/fazenda');
@@ -26,12 +25,10 @@ function DashboardPage() {
 
   const [salvo, setSalvo] = useState(false);
 
-  // 🔥 Salva automaticamente no localStorage sempre que mudar
   useEffect(() => {
     localStorage.setItem('@mr/fazenda', JSON.stringify(fazenda));
   }, [fazenda]);
 
-  // 🔥 Feedback visual de salvamento
   useEffect(() => {
     if (salvo) {
       const timer = setTimeout(() => setSalvo(false), 3000);
@@ -63,10 +60,7 @@ function DashboardPage() {
             <Link to="/" className="text-primary font-semibold">Dashboard</Link>
             <Link to="/pedidos" className="hover:text-foreground cursor-pointer transition-colors">Pedidos</Link>
             <Link to="/produtos" className="hover:text-foreground cursor-pointer transition-colors">Meus Produtos</Link>
-            {/* 🔥 BOTÃO "MINHA FAZENDA" ADICIONADO */}
-            <Link to="/produtor/fazenda-boa-terra" className="hover:text-foreground cursor-pointer transition-colors">
-              Minha Fazenda
-            </Link>
+            {/* 🔥 BOTÃO "MINHA FAZENDA" REMOVIDO */}
             <Link to="/catalogo" className="bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-bold hover:opacity-90 transition-all shadow-sm">
               Ver minha loja
             </Link>
@@ -118,7 +112,7 @@ function DashboardPage() {
           </Link>
         </div>
 
-        {/* 🔥 Card "Minha Fazenda" – com persistência e botão Salvar */}
+        {/* Card "Minha Fazenda" */}
         <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-display font-bold text-foreground">Minha Fazenda</h2>
