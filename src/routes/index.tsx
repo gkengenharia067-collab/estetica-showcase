@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, ShoppingBag, Leaf, MapPin, Phone, MessageCircle, Save, CheckCircle } from "lucide-react";
+import { Plus, ShoppingBag, Leaf, Save, CheckCircle } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useState, useEffect } from "react";
 
@@ -63,6 +63,10 @@ function DashboardPage() {
             <Link to="/" className="text-primary font-semibold">Dashboard</Link>
             <Link to="/pedidos" className="hover:text-foreground cursor-pointer transition-colors">Pedidos</Link>
             <Link to="/produtos" className="hover:text-foreground cursor-pointer transition-colors">Meus Produtos</Link>
+            {/* 🔥 BOTÃO "MINHA FAZENDA" ADICIONADO */}
+            <Link to="/produtor/fazenda-boa-terra" className="hover:text-foreground cursor-pointer transition-colors">
+              Minha Fazenda
+            </Link>
             <Link to="/catalogo" className="bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-bold hover:opacity-90 transition-all shadow-sm">
               Ver minha loja
             </Link>
