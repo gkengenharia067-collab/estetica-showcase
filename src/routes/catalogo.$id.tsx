@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { ArrowLeft, Leaf, MapPin, ShieldCheck, Truck, ChevronRight, Info, Plus, Minus, ShoppingBag, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Leaf, MapPin, ShieldCheck, Truck, ChevronRight, Info, Plus, Minus, ShoppingBag, CheckCircle2, Menu, X } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useState, useEffect } from "react";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
@@ -53,6 +53,7 @@ function ProdutoDetalhesPage() {
   const { produtos, addToCart, cart } = useStore();
   const produto = produtos.find((p) => p.id === id);
   const fazenda = getFazenda();
+  const [menuAberto, setMenuAberto] = useState(false);
 
   const goBackToCatalogo = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
@@ -95,7 +96,7 @@ function ProdutoDetalhesPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link
             to="/"
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-medium text-sm"
+            className="hidden sm:flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-medium text-sm"
           >
             <ArrowLeft className="size-4" />
             Voltar ao painel
@@ -110,10 +111,32 @@ function ProdutoDetalhesPage() {
             )}
             <div className="font-display font-semibold text-lg text-foreground tracking-tight">{fazenda.nome}</div>
           </div>
+
+          {/* 🔥 BOTÃO HAMBÚRGUER (mobile) */}
+          <button
+            type="button"
+            onClick={() => setMenuAberto(!menuAberto)}
+            className="sm:hidden p-2 rounded-lg hover:bg-muted transition-colors"
+            aria-label="Abrir menu"
+          >
+            {menuAberto ? <X className="size-6" /> : <Menu className="size-6" />}
+          </button>
         </div>
+
+        {/* 🔥 MENU MOBILE (dropdown) */}
+        {menuAberto && (
+          <div className="sm:hidden bg-card border-t border-border p-4 flex flex-col gap-3 text-sm font-medium">
+            <Link to="/" className="flex items-center gap-2 text-primary font-semibold" onClick={() => setMenuAberto(false)}>
+              <ArrowLeft className="size-4" />
+              Voltar ao painel
+            </Link>
+            <Link to="/catalogo" className="hover:text-foreground transition-colors" onClick={() => setMenuAberto(false)}>Catálogo</Link>
+            <Link to="/produtor/fazenda-boa-terra" className="hover:text-foreground transition-colors" onClick={() => setMenuAberto(false)}>Sobre a Fazenda</Link>
+          </div>
+        )}
       </header>
 
-      {/* 🔥 SACOLA STICKY NO TOPO */}
+      {/* SACOLA STICKY NO TOPO */}
       <CartDrawer onOpenChange={setCartOpen} />
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 md:py-12 relative">
