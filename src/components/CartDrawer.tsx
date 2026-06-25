@@ -22,21 +22,42 @@ export function CartDrawer({ onOpenChange }: { onOpenChange?: (open: boolean) =>
     onOpenChange?.(open);
   }, [open, onOpenChange]);
 
-  // 🔥 FALLBACK para evitar tela em branco se o carrinho não estiver carregado
-  if (!cart) return <div className="p-4 text-center">Carregando carrinho...</div>;
-
   const totalItens = cart.reduce((a, c) => a + c.quantidade, 0);
   const totalValor = cart.reduce((a, c) => a + c.preco * c.quantidade, 0);
 
+  // 🔥 NOVA FUNÇÃO DE CHECKOUT COM WHATSAPP AUTOMÁTICO
   function handleCheckout(e: React.FormEvent) {
     e.preventDefault();
+
     const pedido = checkoutCart({
       cliente: form.cliente,
       whatsapp: form.whatsapp,
       observacao: form.observacao,
     });
+
     if (pedido) {
       setSuccess(true);
+
+      // 🔥 Pega o número do WhatsApp do localStorage
+      let numeroWhatsApp = '';
+      try {
+        const fazenda = JSON.parse(localStorage.getItem('@mr/fazenda') || '{}');
+        numeroWhatsApp = fazenda.whatsapp || '67999222720';
+      } catch {
+        numeroWhatsApp = '67999222720';
+      }
+      numeroWhatsApp = numeroWhatsApp.replace(/\D/g, '');
+
+      // 🔥 Monta a mensagem
+      const itensTexto = pedido.itens
+        ? pedido.itens.map((item) => `${item.quantidade}x ${item.produto} - R$ ${(item.preco * item.quantidade).toFixed(2)}`).join('\n')
+        : `${pedido.quantidade}x ${pedido.produto}`;
+
+      const mensagem = `Olá! Gostaria de fazer um pedido:\n\n${itensTexto}\n\nTotal: R$ ${pedido.valor.toFixed(2)}\n\nCliente: ${pedido.cliente}\nTelefone: ${form.whatsapp || 'Não informado'}\nObservação: ${form.observacao || 'Nenhuma'}`;
+
+      // 🔥 Abre o WhatsApp automaticamente
+      const url = `https://wa.me/55${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
+      window.open(url, '_blank');
     }
   }
 
@@ -49,7 +70,6 @@ export function CartDrawer({ onOpenChange }: { onOpenChange?: (open: boolean) =>
 
   return (
     <>
-      {/* SACOLA FIXA NO TOPO (STICKY) - SEM BARRA BRANCA */}
       <div className="sticky top-[70px] z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex justify-end">
           <button
@@ -96,7 +116,7 @@ export function CartDrawer({ onOpenChange }: { onOpenChange?: (open: boolean) =>
                 </div>
                 <h3 className="text-xl font-bold mb-2">Pedido enviado!</h3>
                 <p className="text-muted-foreground mb-8 max-w-xs">
-                  Seu pedido foi encaminhado à Fazenda Boa Terra. O produtor entrará em contato em breve.
+                  Seu pedido foi enviado para a fazenda. O WhatsApp será aberto automaticamente para confirmar.
                 </p>
                 <button
                   onClick={reset}
