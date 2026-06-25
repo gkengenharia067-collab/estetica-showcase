@@ -1,98 +1,161 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AppShell } from "@/components/AppShell";
+import { Plus, ShoppingBag, Leaf, MapPin, Phone, MessageCircle } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { useState, useEffect } from "react";
 
 export const Route = createFileRoute("/")({
-  component: Dashboard,
+  component: DashboardPage,
 });
 
 function formatBRL(n: number) {
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-function Dashboard() {
-  const { produtos, pedidos, vendasPeriodo } = useStore();
-  const pendentes = pedidos.filter((p) => p.status === "Pendente").length;
-  const recentes = pedidos.slice(0, 5);
+function DashboardPage() {
+  const { produtos, pedidos } = useStore();
+
+  // 🔥 Estado para os dados da fazenda (persistido no localStorage)
+  const [fazenda, setFazenda] = useState(() => {
+    try {
+      const saved = localStorage.getItem('@mr/fazenda');
+      return saved ? JSON.parse(saved) : { nome: '', telefone: '', cidade: '', descricao: '', whatsapp: '' };
+    } catch {
+      return { nome: '', telefone: '', cidade: '', descricao: '', whatsapp: '' };
+    }
+  });
+
+  // 🔥 Salva automaticamente no localStorage sempre que mudar
+  useEffect(() => {
+    localStorage.setItem('@mr/fazenda', JSON.stringify(fazenda));
+  }, [fazenda]);
+
+  const totalProdutos = produtos.length;
+  const pedidosPendentes = pedidos.filter(p => p.status === "Pendente").length;
+  const totalVendas = pedidos.reduce((acc, p) => acc + p.valor, 0);
 
   return (
-    <AppShell>
-      {/* Header */}
-      <section className="mb-8">
-        <div className="text-sm text-muted-foreground">Bem-vindo de volta 👋</div>
-        <h1 className="text-3xl md:text-4xl font-semibold mt-1">Fazenda Boa Terra</h1>
-        <p className="text-muted-foreground mt-2 max-w-xl">
-          Aqui está um resumo da sua produção e dos pedidos recentes dos seus clientes.
-        </p>
-      </section>
-
-      {/* Stat Cards */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
-        <div className="rounded-2xl bg-card border border-border p-5">
-          <div className="text-sm text-muted-foreground">Produtos cadastrados</div>
-          <div className="text-3xl font-semibold mt-2 font-display">{produtos.length}</div>
+    <div className="min-h-screen bg-background">
+      {/* Header com navegação e botão "Ver minha loja" */}
+      <header className="bg-card border-b border-border sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="size-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-sm">
+              <Leaf className="size-5" />
+            </div>
+            <div className="font-display font-bold text-xl text-foreground tracking-tight">Terra Viva</div>
+          </div>
+          <nav className="hidden sm:flex items-center gap-6 text-sm font-medium text-muted-foreground">
+            <Link to="/" className="text-primary font-semibold">Dashboard</Link>
+            <Link to="/pedidos" className="hover:text-foreground cursor-pointer transition-colors">Pedidos</Link>
+            <Link to="/produtos" className="hover:text-foreground cursor-pointer transition-colors">Meus Produtos</Link>
+            <Link to="/catalogo" className="bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-bold hover:opacity-90 transition-all shadow-sm">
+              Ver minha loja
+            </Link>
+          </nav>
         </div>
-        <div className="rounded-2xl bg-card border border-border p-5">
-          <div className="text-sm text-muted-foreground">Pedidos recebidos</div>
-          <div className="text-3xl font-semibold mt-2 font-display">{pedidos.length}</div>
-          <div className="text-xs text-muted-foreground mt-1">
-            {pendentes} pendente{pendentes === 1 ? "" : "s"}
+      </header>
+
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        {/* Cards de resumo */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-muted-foreground">Produtos cadastrados</h3>
+              <ShoppingBag className="size-5 text-primary" />
+            </div>
+            <p className="text-3xl font-display font-bold text-foreground">{totalProdutos}</p>
+          </div>
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-muted-foreground">Pedidos pendentes</h3>
+              <ShoppingBag className="size-5 text-primary" />
+            </div>
+            <p className="text-3xl font-display font-bold text-foreground">{pedidosPendentes}</p>
+          </div>
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-muted-foreground">Vendas do período</h3>
+              <ShoppingBag className="size-5 text-primary" />
+            </div>
+            <p className="text-3xl font-display font-bold text-foreground">{formatBRL(totalVendas)}</p>
           </div>
         </div>
-        <div className="rounded-2xl bg-card border border-border p-5">
-          <div className="text-sm text-muted-foreground">Vendas do período</div>
-          <div className="text-3xl font-semibold mt-2 font-display">{formatBRL(vendasPeriodo)}</div>
-          <div className="text-xs text-muted-foreground mt-1">Pedidos entregues</div>
+
+        {/* Atalhos rápidos */}
+        <div className="flex flex-wrap gap-4 mb-8">
+          <Link
+            to="/produtos"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold hover:opacity-90 transition-all shadow-sm"
+          >
+            <Plus className="size-5" />
+            Adicionar Produto
+          </Link>
+          <Link
+            to="/pedidos"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-card border border-border rounded-xl font-bold hover:bg-muted transition-all"
+          >
+            <ShoppingBag className="size-5" />
+            Ver Pedidos
+          </Link>
         </div>
-      </section>
 
-      {/* Atalhos */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-        <Link
-          to="/produtos"
-          className="group rounded-2xl bg-card border border-border p-5 flex items-center gap-4 hover:border-primary transition-colors"
-        >
-          <div className="size-12 rounded-xl bg-primary text-primary-foreground flex items-center justify-center text-xl">+</div>
-          <div className="flex-1">
-            <div className="font-semibold text-lg">Adicionar Produto</div>
-            <div className="text-sm text-muted-foreground">Cadastre um novo produto da sua propriedade.</div>
+        {/* 🔥 Card "Minha Fazenda" – Sprint 2 */}
+        <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
+          <h2 className="text-2xl font-display font-bold text-foreground mb-4">Minha Fazenda</h2>
+          <p className="text-muted-foreground text-sm mb-4">Preencha os dados da sua propriedade para aparecer na loja.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Nome da fazenda</label>
+              <input
+                type="text"
+                value={fazenda.nome}
+                onChange={(e) => setFazenda({ ...fazenda, nome: e.target.value })}
+                className="w-full border border-border rounded-xl bg-background px-4 py-3 outline-none focus:border-primary"
+                placeholder="Ex: Fazenda Boa Terra"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Telefone</label>
+              <input
+                type="text"
+                value={fazenda.telefone}
+                onChange={(e) => setFazenda({ ...fazenda, telefone: e.target.value })}
+                className="w-full border border-border rounded-xl bg-background px-4 py-3 outline-none focus:border-primary"
+                placeholder="(00) 0000-0000"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Cidade</label>
+              <input
+                type="text"
+                value={fazenda.cidade}
+                onChange={(e) => setFazenda({ ...fazenda, cidade: e.target.value })}
+                className="w-full border border-border rounded-xl bg-background px-4 py-3 outline-none focus:border-primary"
+                placeholder="Ex: Campo Grande - MS"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">WhatsApp</label>
+              <input
+                type="text"
+                value={fazenda.whatsapp}
+                onChange={(e) => setFazenda({ ...fazenda, whatsapp: e.target.value })}
+                className="w-full border border-border rounded-xl bg-background px-4 py-3 outline-none focus:border-primary"
+                placeholder="(00) 00000-0000"
+              />
+            </div>
           </div>
-        </Link>
-        <Link
-          to="/pedidos"
-          className="group rounded-2xl bg-card border border-border p-5 flex items-center gap-4 hover:border-primary transition-colors"
-        >
-          <div className="size-12 rounded-xl bg-amber-600 text-white flex items-center justify-center text-xl">📋</div>
-          <div className="flex-1">
-            <div className="font-semibold text-lg">Ver Pedidos</div>
-            <div className="text-sm text-muted-foreground">Acompanhe e marque pedidos como entregues.</div>
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-foreground mb-1.5">Descrição</label>
+            <textarea
+              value={fazenda.descricao}
+              onChange={(e) => setFazenda({ ...fazenda, descricao: e.target.value })}
+              className="w-full border border-border rounded-xl bg-background px-4 py-3 outline-none focus:border-primary resize-none h-24"
+              placeholder="Conte um pouco sobre sua fazenda..."
+            />
           </div>
-        </Link>
-      </section>
-
-      {/* Pedidos recentes */}
-      {recentes.length > 0 && (
-        <section className="rounded-2xl bg-card border border-border p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Pedidos recentes</h2>
-            <Link to="/pedidos" className="text-sm text-primary hover:underline">Ver todos</Link>
-          </div>
-          <ul className="divide-y divide-border">
-            {recentes.map((p) => (
-              <li key={p.id} className="py-3 flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="font-medium truncate">{p.cliente}</div>
-                  <div className="text-xs text-muted-foreground truncate">{p.produto} · {p.data}</div>
-                </div>
-                <div className="text-right shrink-0">
-                  <div className="font-semibold">{formatBRL(p.valor)}</div>
-                  <div className="text-xs text-muted-foreground">{p.status}</div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-    </AppShell>
+        </div>
+      </main>
+    </div>
   );
 }
