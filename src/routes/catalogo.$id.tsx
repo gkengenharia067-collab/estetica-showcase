@@ -15,7 +15,6 @@ function formatBRL(n: number) {
 
 const FALLBACK_IMG = "https://images.unsplash.com/photo-1595859703065-cc958019e07b?w=1200&q=80";
 
-// 🔥 Função para carregar os dados da fazenda do localStorage
 function getFazenda() {
   try {
     const saved = localStorage.getItem('@mr/fazenda');
@@ -80,14 +79,13 @@ function ProdutoDetalhesPage() {
       {/* Top Navbar */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={goBackToCatalogo}
+          <Link
+            to="/"
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-medium text-sm"
           >
             <ArrowLeft className="size-4" />
-            Catálogo
-          </button>
+            Voltar ao painel
+          </Link>
           <div className="flex items-center gap-2.5">
             <div className="size-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center shadow-sm">
               <Leaf className="size-4" />
