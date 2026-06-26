@@ -25,7 +25,6 @@ export function CartDrawer({ onOpenChange }: { onOpenChange?: (open: boolean) =>
   const totalItens = cart.reduce((a, c) => a + c.quantidade, 0);
   const totalValor = cart.reduce((a, c) => a + c.preco * c.quantidade, 0);
 
-  // 🔥 NOVA FUNÇÃO DE CHECKOUT COM WHATSAPP AUTOMÁTICO
   function handleCheckout(e: React.FormEvent) {
     e.preventDefault();
 
@@ -38,7 +37,6 @@ export function CartDrawer({ onOpenChange }: { onOpenChange?: (open: boolean) =>
     if (pedido) {
       setSuccess(true);
 
-      // 🔥 Pega o número do WhatsApp do localStorage
       let numeroWhatsApp = '';
       try {
         const fazenda = JSON.parse(localStorage.getItem('@mr/fazenda') || '{}');
@@ -48,14 +46,13 @@ export function CartDrawer({ onOpenChange }: { onOpenChange?: (open: boolean) =>
       }
       numeroWhatsApp = numeroWhatsApp.replace(/\D/g, '');
 
-      // 🔥 Monta a mensagem
+      // 🔥 MENSAGEM FORMATADA COM EMOJIS
       const itensTexto = pedido.itens
-        ? pedido.itens.map((item) => `${item.quantidade}x ${item.produto} - R$ ${(item.preco * item.quantidade).toFixed(2)}`).join('\n')
-        : `${pedido.quantidade}x ${pedido.produto}`;
+        ? pedido.itens.map((item) => `• ${item.quantidade}x ${item.produto}`).join('\n')
+        : `• ${pedido.quantidade}x ${pedido.produto}`;
 
-      const mensagem = `Olá! Gostaria de fazer um pedido:\n\n${itensTexto}\n\nTotal: R$ ${pedido.valor.toFixed(2)}\n\nCliente: ${pedido.cliente}\nTelefone: ${form.whatsapp || 'Não informado'}\nObservação: ${form.observacao || 'Nenhuma'}`;
+      const mensagem = `🌱 *NOVO PEDIDO*\n\n👤 Cliente: ${pedido.cliente}\n📞 Telefone: ${form.whatsapp || 'Não informado'}\n\n🛒 *ITENS:*\n${itensTexto}\n\n📝 Observações: ${form.observacao || 'Nenhuma'}\n\n💰 *TOTAL: R$ ${pedido.valor.toFixed(2)}*`;
 
-      // 🔥 Abre o WhatsApp automaticamente
       const url = `https://wa.me/55${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
       window.open(url, '_blank');
     }
@@ -70,6 +67,7 @@ export function CartDrawer({ onOpenChange }: { onOpenChange?: (open: boolean) =>
 
   return (
     <>
+      {/* SACOLA STICKY NO TOPO */}
       <div className="sticky top-[70px] z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex justify-end">
           <button
