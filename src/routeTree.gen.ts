@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ServicosRouteImport } from './routes/servicos'
 import { Route as ProdutosRouteImport } from './routes/produtos'
 import { Route as PedidosRouteImport } from './routes/pedidos'
 import { Route as IndexRouteImport } from './routes/index'
@@ -16,6 +17,11 @@ import { Route as CatalogoIndexRouteImport } from './routes/catalogo.index'
 import { Route as ProdutorFazendaBoaTerraRouteImport } from './routes/produtor.fazenda-boa-terra'
 import { Route as CatalogoIdRouteImport } from './routes/catalogo.$id'
 
+const ServicosRoute = ServicosRouteImport.update({
+  id: '/servicos',
+  path: '/servicos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProdutosRoute = ProdutosRouteImport.update({
   id: '/produtos',
   path: '/produtos',
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/pedidos': typeof PedidosRoute
   '/produtos': typeof ProdutosRoute
+  '/servicos': typeof ServicosRoute
   '/catalogo/$id': typeof CatalogoIdRoute
   '/produtor/fazenda-boa-terra': typeof ProdutorFazendaBoaTerraRoute
   '/catalogo/': typeof CatalogoIndexRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/pedidos': typeof PedidosRoute
   '/produtos': typeof ProdutosRoute
+  '/servicos': typeof ServicosRoute
   '/catalogo/$id': typeof CatalogoIdRoute
   '/produtor/fazenda-boa-terra': typeof ProdutorFazendaBoaTerraRoute
   '/catalogo': typeof CatalogoIndexRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/pedidos': typeof PedidosRoute
   '/produtos': typeof ProdutosRoute
+  '/servicos': typeof ServicosRoute
   '/catalogo/$id': typeof CatalogoIdRoute
   '/produtor/fazenda-boa-terra': typeof ProdutorFazendaBoaTerraRoute
   '/catalogo/': typeof CatalogoIndexRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/pedidos'
     | '/produtos'
+    | '/servicos'
     | '/catalogo/$id'
     | '/produtor/fazenda-boa-terra'
     | '/catalogo/'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/pedidos'
     | '/produtos'
+    | '/servicos'
     | '/catalogo/$id'
     | '/produtor/fazenda-boa-terra'
     | '/catalogo'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/pedidos'
     | '/produtos'
+    | '/servicos'
     | '/catalogo/$id'
     | '/produtor/fazenda-boa-terra'
     | '/catalogo/'
@@ -103,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PedidosRoute: typeof PedidosRoute
   ProdutosRoute: typeof ProdutosRoute
+  ServicosRoute: typeof ServicosRoute
   CatalogoIdRoute: typeof CatalogoIdRoute
   ProdutorFazendaBoaTerraRoute: typeof ProdutorFazendaBoaTerraRoute
   CatalogoIndexRoute: typeof CatalogoIndexRoute
@@ -110,6 +123,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/servicos': {
+      id: '/servicos'
+      path: '/servicos'
+      fullPath: '/servicos'
+      preLoaderRoute: typeof ServicosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/produtos': {
       id: '/produtos'
       path: '/produtos'
@@ -159,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PedidosRoute: PedidosRoute,
   ProdutosRoute: ProdutosRoute,
+  ServicosRoute: ServicosRoute,
   CatalogoIdRoute: CatalogoIdRoute,
   ProdutorFazendaBoaTerraRoute: ProdutorFazendaBoaTerraRoute,
   CatalogoIndexRoute: CatalogoIndexRoute,
