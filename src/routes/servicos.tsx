@@ -164,7 +164,6 @@ function Servicos() {
             />
           </div>
 
-          {/* Upload de imagem + URL */}
           <div className="md:col-span-2">
             <label className="block text-sm font-medium">Imagem do serviço</label>
             <div className="flex flex-col gap-2">
