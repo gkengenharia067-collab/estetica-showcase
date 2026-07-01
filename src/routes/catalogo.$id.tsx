@@ -1,305 +1,213 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { ArrowLeft, Leaf, MapPin, ShieldCheck, Truck, ChevronRight, Info, Plus, Minus, ShoppingBag, CheckCircle2, Menu, X } from "lucide-react";
-import { useStore } from "@/lib/store";
-import { useState, useEffect } from "react";
-import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
-import { CartDrawer } from "@/components/CartDrawer";
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import Calendar from 'react-calendar'
+import { format, isToday, isPast } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { CalendarDays, Clock, User, Phone, Sparkles } from 'lucide-react'
+import 'react-calendar/dist/Calendar.css'
 
-export const Route = createFileRoute("/catalogo/$id")({
-  component: ProdutoDetalhesPage,
-});
+export const Route = createFileRoute('/catalogo/$id')({
+  component: DetalhesServico,
+})
 
-function formatBRL(n: number) {
-  return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
+function DetalhesServico() {
+  const { id } = Route.useParams()
+  const [servico, setServico] = useState(null)
+  const [agendamentos, setAgendamentos] = useState([])
+  const [dataSelecionada, setDataSelecionada] = useState(new Date())
+  const [horarioSelecionado, setHorarioSelecionado] = useState('')
+  const [clienteNome, setClienteNome] = useState('')
+  const [clienteTelefone, setClienteTelefone] = useState('')
+  const [horariosDisponiveis, setHorariosDisponiveis] = useState([])
 
-const FALLBACK_IMG = "https://images.unsplash.com/photo-1595859703065-cc958019e07b?w=1200&q=80";
+  useEffect(() => {
+    const storedServicos = JSON.parse(localStorage.getItem('@clinic/servicos') || '[]')
+    const found = storedServicos.find(s => s.id === id)
+    setServico(found)
 
-function getFazenda() {
-  try {
-    const saved = localStorage.getItem('@mr/fazenda');
-    return saved ? JSON.parse(saved) : { 
-      nome: 'Terra Viva', 
-      cidade: 'Serra do Vale, MG', 
-      descricao: '', 
-      whatsapp: '',
-      logo: '',
-      capa: ''
-    };
-  } catch {
-    return { 
-      nome: 'Terra Viva', 
-      cidade: 'Serra do Vale, MG', 
-      descricao: '', 
-      whatsapp: '',
-      logo: '',
-      capa: ''
-    };
-  }
-}
+    const storedAgendamentos = JSON.parse(localStorage.getItem('@clinic/agendamentos') || '[]')
+    setAgendamentos(storedAgendamentos)
+  }, [id])
 
-function getFullDescription(nome: string, categoria: string) {
-  const map: Record<string, string> = {
-    "Tomate orgânico": "Nossos tomates são cultivados em solo rico e orgânico, sem adição de produtos químicos. Eles amadurecem no pé, garantindo um sabor adocicado, coloração vibrante e textura suculenta. Perfeitos para molhos artesanais, saladas frescas ou para comer como petisco.",
-    "Mel artesanal": "Extraído a frio das nossas próprias colmeias silvestres, localizadas na reserva ambiental da propriedade. É um mel cru, que preserva todas as enzimas, vitaminas e sabor floral único da nossa região. Um verdadeiro néctar da natureza.",
-    "Ovos caipiras": "Ovos de galinhas livres, que ciscam pelo pomar e recebem uma alimentação equilibrada, natural e sem antibióticos. A gema possui uma cor intensa e um sabor inigualável, trazendo mais saúde e qualidade para suas receitas de família.",
-  };
-  return map[nome] || `Este maravilhoso produto da categoria ${categoria.toLowerCase()} é produzido com muito zelo, seguindo os rigorosos padrões de qualidade da nossa fazenda. Ideal para a sua família.`;
-}
+  useEffect(() => {
+    if (!servico) return
+    const dataStr = format(dataSelecionada, 'yyyy-MM-dd')
+    const diaSemana = format(dataSelecionada, 'EEEE', { locale: ptBR })
+    const diaNormalizado = diaSemana.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    const diasDisponiveis = servico.diasSemana.map(d => d.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase())
 
-function ProdutoDetalhesPage() {
-  const { id } = Route.useParams();
-  const router = useRouter();
-  const { produtos, addToCart, cart } = useStore();
-  const produto = produtos.find((p) => p.id === id);
-  const fazenda = getFazenda();
-  const [menuAberto, setMenuAberto] = useState(false);
-
-  const goBackToCatalogo = () => {
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.history.back();
-    } else {
-      router.navigate({ to: "/catalogo" });
+    if (!diasDisponiveis.includes(diaNormalizado)) {
+      setHorariosDisponiveis([])
+      return
     }
-  };
 
-  const [qtd, setQtd] = useState(1);
-  const [added, setAdded] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  const itemNoCarrinho = cart.find((c) => c.id === id);
+    const ocupados = agendamentos
+      .filter(a => a.servicoId === id && a.data === dataStr && a.status !== 'cancelado')
+      .map(a => a.horario)
 
-  if (!produto) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center bg-card p-10 rounded-2xl shadow-sm border border-border">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Produto não encontrado</h1>
-          <Link to="/catalogo" className="text-primary hover:underline font-medium">
-            &larr; Voltar ao catálogo
-          </Link>
-        </div>
-      </div>
-    );
+    const todosHorarios = servico.horarios || []
+    const agora = new Date()
+    const hoje = isToday(dataSelecionada)
+
+    const disponiveis = todosHorarios.filter(h => {
+      if (ocupados.includes(h)) return false
+      if (hoje) {
+        const [hora, min] = h.split(':').map(Number)
+        const horarioDate = new Date()
+        horarioDate.setHours(hora, min, 0, 0)
+        return horarioDate > agora
+      }
+      return true
+    })
+
+    setHorariosDisponiveis(disponiveis)
+    setHorarioSelecionado('')
+  }, [dataSelecionada, servico, agendamentos, id])
+
+  const handleAgendar = () => {
+    if (!clienteNome || !clienteTelefone || !horarioSelecionado) {
+      alert('Preencha todos os campos e selecione um horário.')
+      return
+    }
+
+    const dataStr = format(dataSelecionada, 'yyyy-MM-dd')
+    const novoAgendamento = {
+      id: Date.now().toString(),
+      servicoId: id,
+      data: dataStr,
+      horario: horarioSelecionado,
+      clienteNome,
+      clienteTelefone,
+      status: 'confirmado',
+      criadoEm: new Date().toISOString(),
+    }
+
+    const updated = [...agendamentos, novoAgendamento]
+    localStorage.setItem('@clinic/agendamentos', JSON.stringify(updated))
+    setAgendamentos(updated)
+
+    const mensagem = `Olá! Gostaria de confirmar meu agendamento:\n\n*Serviço:* ${servico.nome}\n*Data:* ${format(dataSelecionada, 'dd/MM/yyyy')}\n*Horário:* ${horarioSelecionado}\n*Cliente:* ${clienteNome}\n*Telefone:* ${clienteTelefone}\n\nAguardando confirmação.`
+    const numero = '5511999999999' // Substitua pelo número da clínica
+    const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`
+    window.open(url, '_blank')
+
+    alert('Agendamento realizado com sucesso! Você será redirecionado ao WhatsApp para finalizar.')
+    setClienteNome('')
+    setClienteTelefone('')
+    setHorarioSelecionado('')
   }
 
-  function handleAdd() {
-    addToCart(produto!, qtd);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
+  if (!servico) return <div className="p-6">Serviço não encontrado.</div>
+
+  const tileDisabled = ({ date }) => {
+    if (isPast(date) && !isToday(date)) return true
+    const diaSemana = format(date, 'EEEE', { locale: ptBR })
+    const diaNormalizado = diaSemana.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    const diasDisponiveis = servico.diasSemana.map(d => d.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase())
+    return !diasDisponiveis.includes(diaNormalizado)
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col font-sans">
-      {/* Top Navbar */}
-      <header className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link
-            to="/"
-            className="hidden sm:flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-medium text-sm"
-          >
-            <ArrowLeft className="size-4" />
-            Voltar ao painel
-          </Link>
-          <div className="flex items-center gap-2.5">
-            {fazenda.logo ? (
-              <img src={fazenda.logo} alt="Logo" className="h-8 w-auto object-contain" />
-            ) : (
-              <div className="size-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center shadow-sm">
-                <Leaf className="size-4" />
-              </div>
-            )}
-            <div className="font-display font-semibold text-lg text-foreground tracking-tight">{fazenda.nome}</div>
+    <div className="p-6 max-w-4xl mx-auto">
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-pink-100">
+        {servico.imagem && <img src={servico.imagem} alt={servico.nome} className="w-full h-64 object-cover" />}
+        <div className="p-6">
+          <h1 className="text-3xl font-bold text-pink-600">{servico.nome}</h1>
+          <p className="text-gray-600 mt-2">{servico.descricao}</p>
+          <div className="flex gap-4 mt-3">
+            <span className="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-sm">R$ {servico.preco}</span>
+            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">{servico.duracao} min</span>
           </div>
+          <p className="text-sm text-gray-500 mt-2">Disponível: {servico.diasSemana.join(', ')}</p>
+        </div>
+      </div>
 
-          {/* 🔥 BOTÃO HAMBÚRGUER (mobile) */}
-          <button
-            type="button"
-            onClick={() => setMenuAberto(!menuAberto)}
-            className="sm:hidden p-2 rounded-lg hover:bg-muted transition-colors"
-            aria-label="Abrir menu"
-          >
-            {menuAberto ? <X className="size-6" /> : <Menu className="size-6" />}
-          </button>
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <CalendarDays className="w-5 h-5" /> Escolha o dia
+          </h2>
+          <Calendar
+            onChange={setDataSelecionada}
+            value={dataSelecionada}
+            tileDisabled={tileDisabled}
+            locale="pt-BR"
+            className="mt-2 rounded-lg shadow border border-pink-200"
+            minDate={new Date()}
+          />
+          <p className="text-sm text-gray-500 mt-2">
+            Dias destacados estão disponíveis. Dias cinza não atendemos.
+          </p>
         </div>
 
-        {/* 🔥 MENU MOBILE (dropdown) */}
-        {menuAberto && (
-          <div className="sm:hidden bg-card border-t border-border p-4 flex flex-col gap-3 text-sm font-medium">
-            <Link to="/" className="flex items-center gap-2 text-primary font-semibold" onClick={() => setMenuAberto(false)}>
-              <ArrowLeft className="size-4" />
-              Voltar ao painel
-            </Link>
-            <Link to="/catalogo" className="hover:text-foreground transition-colors" onClick={() => setMenuAberto(false)}>Catálogo</Link>
-            <Link to="/produtor/fazenda-boa-terra" className="hover:text-foreground transition-colors" onClick={() => setMenuAberto(false)}>Sobre a Fazenda</Link>
-          </div>
-        )}
-      </header>
+        <div>
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <Clock className="w-5 h-5" /> Horários disponíveis
+            <span className="text-sm font-normal text-gray-500">
+              ({format(dataSelecionada, 'dd/MM/yyyy')})
+            </span>
+          </h2>
 
-      {/* SACOLA STICKY NO TOPO */}
-      <CartDrawer onOpenChange={setCartOpen} />
-
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 md:py-12 relative">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
-          <Link to="/catalogo" className="hover:text-primary transition-colors">Início</Link>
-          <ChevronRight className="size-4" />
-          <span>{produto.categoria}</span>
-          <ChevronRight className="size-4" />
-          <span className="text-foreground font-medium">{produto.nome}</span>
-        </div>
-
-        <div className="bg-card rounded-[2rem] border border-border shadow-sm overflow-hidden flex flex-col lg:flex-row">
-          
-          {/* Product Image */}
-          <div className="lg:w-1/2 relative min-h-[400px] lg:min-h-full bg-muted">
-            <img 
-              src={produto.imagem || FALLBACK_IMG} 
-              alt={produto.nome}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            {produto.estoque === 0 && (
-              <div className="absolute inset-0 bg-background/50 flex items-center justify-center backdrop-blur-sm">
-                <span className="bg-destructive text-destructive-foreground px-6 py-2 rounded-full text-lg font-bold tracking-widest uppercase shadow-md">
-                  Esgotado
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Product Details */}
-          <div className="lg:w-1/2 p-8 md:p-12 lg:p-14 flex flex-col">
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-5 w-fit">
-              {produto.categoria}
+          {horariosDisponiveis.length === 0 ? (
+            <p className="text-gray-500 mt-2">Nenhum horário disponível para esta data.</p>
+          ) : (
+            <div className="grid grid-cols-3 gap-2 mt-2">
+              {horariosDisponiveis.map(h => (
+                <button
+                  key={h}
+                  onClick={() => setHorarioSelecionado(h)}
+                  className={`py-2 px-3 rounded-lg border ${
+                    horarioSelecionado === h
+                      ? 'bg-pink-500 text-white border-pink-500'
+                      : 'bg-white border-gray-300 hover:bg-pink-50'
+                  }`}
+                >
+                  {h}
+                </button>
+              ))}
             </div>
-            
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground mb-4 leading-tight">
-              {produto.nome}
-            </h1>
-            
-            <div className="flex items-baseline gap-3 mb-6">
-              <span className="text-4xl md:text-5xl font-display font-bold text-primary">
-                {formatBRL(produto.preco)}
-              </span>
-              <span className="text-xl text-muted-foreground font-medium">/ {produto.unidade}</span>
-            </div>
+          )}
 
-            <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-              {getFullDescription(produto.nome, produto.categoria)}
-            </p>
-
-            {/* Trust Signals */}
-            <div className="grid grid-cols-2 gap-4 mb-10">
-              <div className="flex flex-col gap-1 p-4 rounded-xl bg-accent/40 border border-border">
-                <ShieldCheck className="size-6 text-primary mb-1" />
-                <span className="font-semibold text-foreground">100% Qualidade</span>
-                <span className="text-xs text-muted-foreground">Garantia da fazenda</span>
-              </div>
-              <div className="flex flex-col gap-1 p-4 rounded-xl bg-accent/40 border border-border">
-                <Truck className="size-6 text-primary mb-1" />
-                <span className="font-semibold text-foreground">Entrega Local</span>
-                <span className="text-xs text-muted-foreground">Direto na sua porta</span>
-              </div>
-            </div>
-
-            {/* Producer Info */}
-            <Link 
-              to="/produtor/fazenda-boa-terra"
-              className="group flex items-center justify-between mt-auto mb-8 border-t border-b border-border py-6 hover:bg-accent/40 transition-colors px-4 -mx-4 rounded-2xl cursor-pointer"
-            >
-              <div className="flex items-center gap-4">
-                <img 
-                  src={fazenda.logo || "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=100&h=100&fit=crop&q=80"} 
-                  alt={fazenda.nome}
-                  className="size-14 rounded-full border-2 border-border shadow-sm object-cover group-hover:scale-105 transition-transform"
-                />
-                <div>
-                  <h3 className="font-bold text-foreground text-lg group-hover:text-primary transition-colors">{fazenda.nome}</h3>
-                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-0.5">
-                    <MapPin className="size-4" /> {fazenda.cidade || "Serra do Vale, MG"}
-                  </div>
+          {horarioSelecionado && (
+            <div className="mt-6 bg-pink-50 p-4 rounded-xl border border-pink-200">
+              <p className="font-semibold">Horário selecionado: {horarioSelecionado}</p>
+              <div className="mt-3 space-y-3">
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-pink-600" />
+                  <input
+                    type="text"
+                    placeholder="Seu nome"
+                    value={clienteNome}
+                    onChange={(e) => setClienteNome(e.target.value)}
+                    className="flex-1 border rounded-lg p-2"
+                  />
                 </div>
-              </div>
-              <ChevronRight className="size-5 text-muted-foreground group-hover:text-primary transition-colors" />
-            </Link>
-
-            {/* CTA */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                {produto.estoque > 0 ? (
-                  <span className="flex items-center gap-1.5 text-primary font-medium text-sm">
-                    <span className="relative flex h-3 w-3">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/75 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
-                    </span>
-                    Em estoque ({produto.estoque} disponíveis)
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1.5 text-destructive font-medium text-sm">
-                    <Info className="size-4" />
-                    Sem estoque no momento
-                  </span>
-                )}
-              </div>
-              
-              {produto.estoque > 0 && (
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-sm font-medium text-foreground">Quantidade:</span>
-                  <div className="flex items-center border border-border rounded-xl overflow-hidden">
-                    <button
-                      type="button"
-                      onClick={() => setQtd((q) => Math.max(1, q - 1))}
-                      className="size-10 flex items-center justify-center hover:bg-muted disabled:opacity-40"
-                      disabled={qtd <= 1}
-                    >
-                      <Minus className="size-4" />
-                    </button>
-                    <span className="w-10 text-center font-semibold">{qtd}</span>
-                    <button
-                      type="button"
-                      onClick={() => setQtd((q) => Math.min(produto.estoque, q + 1))}
-                      className="size-10 flex items-center justify-center hover:bg-muted disabled:opacity-40"
-                      disabled={qtd >= produto.estoque}
-                    >
-                      <Plus className="size-4" />
-                    </button>
-                  </div>
-                  {mounted && itemNoCarrinho && (
-                    <span className="text-xs text-muted-foreground">
-                      {itemNoCarrinho.quantidade} já na sacola
-                    </span>
-                  )}
+                <div className="flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-pink-600" />
+                  <input
+                    type="tel"
+                    placeholder="Seu telefone (com DDD)"
+                    value={clienteTelefone}
+                    onChange={(e) => setClienteTelefone(e.target.value)}
+                    className="flex-1 border rounded-lg p-2"
+                  />
                 </div>
-              )}
-
-              <button
-                disabled={produto.estoque === 0}
-                onClick={handleAdd}
-                className={`w-full flex items-center justify-center gap-3 py-4 md:py-5 rounded-2xl font-bold text-lg transition-all ${
-                  produto.estoque > 0
-                    ? added
-                      ? "bg-green-600 text-white shadow-lg"
-                      : "bg-primary text-primary-foreground shadow-lg hover:opacity-90 active:scale-[0.98]"
-                    : "bg-muted text-muted-foreground cursor-not-allowed"
-                }`}
-              >
-                {added ? (
-                  <>
-                    <CheckCircle2 className="size-5" />
-                    Adicionado à sacola!
-                  </>
-                ) : (
-                  <>
-                    <ShoppingBag className="size-5" />
-                    Adicionar à sacola
-                  </>
-                )}
-              </button>
+                <button
+                  onClick={handleAgendar}
+                  className="w-full bg-pink-500 text-white py-3 rounded-lg hover:bg-pink-600 transition flex items-center justify-center gap-2"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  Agendar e enviar WhatsApp
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
-      </main>
-      {!cartOpen && <FloatingWhatsApp />}
+      </div>
+
+      <div className="mt-8">
+        <Link to="/catalogo" className="text-pink-500 hover:underline">← Voltar ao catálogo</Link>
+      </div>
     </div>
-  );
+  )
 }
