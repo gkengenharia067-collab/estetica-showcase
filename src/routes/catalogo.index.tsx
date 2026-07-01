@@ -10,8 +10,10 @@ function Catalogo() {
   const [servicos, setServicos] = useState([])
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem('@clinic/servicos') || '[]')
-    setServicos(stored)
+    if (typeof window !== 'undefined') {
+      const stored = JSON.parse(localStorage.getItem('@clinic/servicos') || '[]')
+      setServicos(stored)
+    }
   }, [])
 
   return (
