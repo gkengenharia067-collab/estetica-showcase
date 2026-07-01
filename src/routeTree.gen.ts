@@ -10,26 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ServicosRouteImport } from './routes/servicos'
-import { Route as ProdutosRouteImport } from './routes/produtos'
-import { Route as PedidosRouteImport } from './routes/pedidos'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CatalogoIndexRouteImport } from './routes/catalogo.index'
-import { Route as ProdutorFazendaBoaTerraRouteImport } from './routes/produtor.fazenda-boa-terra'
 import { Route as CatalogoIdRouteImport } from './routes/catalogo.$id'
 
 const ServicosRoute = ServicosRouteImport.update({
   id: '/servicos',
   path: '/servicos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProdutosRoute = ProdutosRouteImport.update({
-  id: '/produtos',
-  path: '/produtos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PedidosRoute = PedidosRouteImport.update({
-  id: '/pedidos',
-  path: '/pedidos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -42,11 +29,6 @@ const CatalogoIndexRoute = CatalogoIndexRouteImport.update({
   path: '/catalogo/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProdutorFazendaBoaTerraRoute = ProdutorFazendaBoaTerraRouteImport.update({
-  id: '/produtor/fazenda-boa-terra',
-  path: '/produtor/fazenda-boa-terra',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CatalogoIdRoute = CatalogoIdRouteImport.update({
   id: '/catalogo/$id',
   path: '/catalogo/$id',
@@ -55,69 +37,35 @@ const CatalogoIdRoute = CatalogoIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/pedidos': typeof PedidosRoute
-  '/produtos': typeof ProdutosRoute
   '/servicos': typeof ServicosRoute
   '/catalogo/$id': typeof CatalogoIdRoute
-  '/produtor/fazenda-boa-terra': typeof ProdutorFazendaBoaTerraRoute
   '/catalogo/': typeof CatalogoIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/pedidos': typeof PedidosRoute
-  '/produtos': typeof ProdutosRoute
   '/servicos': typeof ServicosRoute
   '/catalogo/$id': typeof CatalogoIdRoute
-  '/produtor/fazenda-boa-terra': typeof ProdutorFazendaBoaTerraRoute
   '/catalogo': typeof CatalogoIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/pedidos': typeof PedidosRoute
-  '/produtos': typeof ProdutosRoute
   '/servicos': typeof ServicosRoute
   '/catalogo/$id': typeof CatalogoIdRoute
-  '/produtor/fazenda-boa-terra': typeof ProdutorFazendaBoaTerraRoute
   '/catalogo/': typeof CatalogoIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/pedidos'
-    | '/produtos'
-    | '/servicos'
-    | '/catalogo/$id'
-    | '/produtor/fazenda-boa-terra'
-    | '/catalogo/'
+  fullPaths: '/' | '/servicos' | '/catalogo/$id' | '/catalogo/'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/pedidos'
-    | '/produtos'
-    | '/servicos'
-    | '/catalogo/$id'
-    | '/produtor/fazenda-boa-terra'
-    | '/catalogo'
-  id:
-    | '__root__'
-    | '/'
-    | '/pedidos'
-    | '/produtos'
-    | '/servicos'
-    | '/catalogo/$id'
-    | '/produtor/fazenda-boa-terra'
-    | '/catalogo/'
+  to: '/' | '/servicos' | '/catalogo/$id' | '/catalogo'
+  id: '__root__' | '/' | '/servicos' | '/catalogo/$id' | '/catalogo/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  PedidosRoute: typeof PedidosRoute
-  ProdutosRoute: typeof ProdutosRoute
   ServicosRoute: typeof ServicosRoute
   CatalogoIdRoute: typeof CatalogoIdRoute
-  ProdutorFazendaBoaTerraRoute: typeof ProdutorFazendaBoaTerraRoute
   CatalogoIndexRoute: typeof CatalogoIndexRoute
 }
 
@@ -128,20 +76,6 @@ declare module '@tanstack/react-router' {
       path: '/servicos'
       fullPath: '/servicos'
       preLoaderRoute: typeof ServicosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/produtos': {
-      id: '/produtos'
-      path: '/produtos'
-      fullPath: '/produtos'
-      preLoaderRoute: typeof ProdutosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pedidos': {
-      id: '/pedidos'
-      path: '/pedidos'
-      fullPath: '/pedidos'
-      preLoaderRoute: typeof PedidosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -158,13 +92,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CatalogoIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/produtor/fazenda-boa-terra': {
-      id: '/produtor/fazenda-boa-terra'
-      path: '/produtor/fazenda-boa-terra'
-      fullPath: '/produtor/fazenda-boa-terra'
-      preLoaderRoute: typeof ProdutorFazendaBoaTerraRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/catalogo/$id': {
       id: '/catalogo/$id'
       path: '/catalogo/$id'
@@ -177,11 +104,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  PedidosRoute: PedidosRoute,
-  ProdutosRoute: ProdutosRoute,
   ServicosRoute: ServicosRoute,
   CatalogoIdRoute: CatalogoIdRoute,
-  ProdutorFazendaBoaTerraRoute: ProdutorFazendaBoaTerraRoute,
   CatalogoIndexRoute: CatalogoIndexRoute,
 }
 export const routeTree = rootRouteImport
