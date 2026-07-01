@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
-import { Sparkles, ArrowLeft } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Sparkles, ArrowLeft, Upload, Link2, X } from 'lucide-react'
 
 export const Route = createFileRoute('/servicos')({
   component: Servicos,
@@ -22,6 +22,8 @@ function Servicos() {
     diasSemana: [],
     horarios: [],
   })
+  const [previewImagem, setPreviewImagem] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     carregarServicos()
@@ -53,6 +55,7 @@ function Servicos() {
     }
     salvarServicos(lista)
     setForm({ nome: '', descricao: '', preco: '', duracao: '60', imagem: '', categoria: '', diasSemana: [], horarios: [] })
+    setPreviewImagem('')
     setEditando(null)
   }
 
@@ -66,6 +69,7 @@ function Servicos() {
   const handleEdit = (servico) => {
     setEditando(servico)
     setForm(servico)
+    setPreviewImagem(servico.imagem || '')
   }
 
   const toggleDia = (dia) => {
@@ -86,9 +90,27 @@ function Servicos() {
     }
   }
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64 = reader.result as string
+        setForm({ ...form, imagem: base64 })
+        setPreviewImagem(base64)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const removerImagem = () => {
+    setForm({ ...form, imagem: '' })
+    setPreviewImagem('')
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      {/* Botão Voltar */}
       <Link to="/" className="inline-flex items-center gap-2 text-pink-600 hover:text-pink-800 mb-4 transition">
         <ArrowLeft className="w-4 h-4" />
         Voltar ao Dashboard
@@ -141,16 +163,58 @@ function Servicos() {
               className="w-full border rounded-lg p-2"
             />
           </div>
+
+          {/* Upload de imagem + URL */}
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium">URL da imagem</label>
-            <input
-              type="text"
-              value={form.imagem}
-              onChange={(e) => setForm({ ...form, imagem: e.target.value })}
-              className="w-full border rounded-lg p-2"
-              placeholder="https://exemplo.com/imagem.jpg"
-            />
+            <label className="block text-sm font-medium">Imagem do serviço</label>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Link2 className="size-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={form.imagem?.startsWith('data:') ? '' : form.imagem || ''}
+                  onChange={(e) => {
+                    setForm({ ...form, imagem: e.target.value })
+                    setPreviewImagem(e.target.value)
+                  }}
+                  className="flex-1 border rounded-lg p-2"
+                  placeholder="URL da imagem (ex: https://...)"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Upload className="size-4 text-muted-foreground" />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm"
+                >
+                  Escolher arquivo
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                {previewImagem && (
+                  <button
+                    type="button"
+                    onClick={removerImagem}
+                    className="text-red-500 hover:text-red-700 transition"
+                  >
+                    <X className="size-4" />
+                  </button>
+                )}
+              </div>
+              {previewImagem && (
+                <div className="mt-2">
+                  <img src={previewImagem} alt="Preview" className="h-24 w-auto object-contain rounded border" />
+                </div>
+              )}
+            </div>
           </div>
+
           <div className="md:col-span-2">
             <label className="block text-sm font-medium">Descrição</label>
             <textarea
@@ -200,7 +264,7 @@ function Servicos() {
             {editando ? 'Atualizar' : 'Cadastrar'}
           </button>
           {editando && (
-            <button type="button" onClick={() => { setEditando(null); setForm({ nome: '', descricao: '', preco: '', duracao: '60', imagem: '', categoria: '', diasSemana: [], horarios: [] }) }} className="bg-gray-300 px-6 py-2 rounded-lg">
+            <button type="button" onClick={() => { setEditando(null); setForm({ nome: '', descricao: '', preco: '', duracao: '60', imagem: '', categoria: '', diasSemana: [], horarios: [] }); setPreviewImagem('') }} className="bg-gray-300 px-6 py-2 rounded-lg">
               Cancelar
             </button>
           )}
