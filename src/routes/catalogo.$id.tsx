@@ -21,12 +21,14 @@ function DetalhesServico() {
   const [horariosDisponiveis, setHorariosDisponiveis] = useState([])
 
   useEffect(() => {
-    const storedServicos = JSON.parse(localStorage.getItem('@clinic/servicos') || '[]')
-    const found = storedServicos.find(s => s.id === id)
-    setServico(found)
+    if (typeof window !== 'undefined') {
+      const storedServicos = JSON.parse(localStorage.getItem('@clinic/servicos') || '[]')
+      const found = storedServicos.find(s => s.id === id)
+      setServico(found)
 
-    const storedAgendamentos = JSON.parse(localStorage.getItem('@clinic/agendamentos') || '[]')
-    setAgendamentos(storedAgendamentos)
+      const storedAgendamentos = JSON.parse(localStorage.getItem('@clinic/agendamentos') || '[]')
+      setAgendamentos(storedAgendamentos)
+    }
   }, [id])
 
   useEffect(() => {
