@@ -1,6 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, ArrowLeft } from 'lucide-react'
 
 export const Route = createFileRoute('/servicos')({
   component: Servicos,
@@ -88,6 +88,12 @@ function Servicos() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
+      {/* Botão Voltar */}
+      <Link to="/" className="inline-flex items-center gap-2 text-pink-600 hover:text-pink-800 mb-4 transition">
+        <ArrowLeft className="w-4 h-4" />
+        Voltar ao Dashboard
+      </Link>
+
       <h1 className="text-2xl font-bold text-pink-600 flex items-center gap-2">
         <Sparkles className="w-6 h-6" />
         Gerenciar Serviços
