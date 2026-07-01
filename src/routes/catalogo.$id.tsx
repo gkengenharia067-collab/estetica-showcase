@@ -87,7 +87,7 @@ function DetalhesServico() {
     setAgendamentos(updated)
 
     const mensagem = `Olá! Gostaria de confirmar meu agendamento:\n\n*Serviço:* ${servico.nome}\n*Data:* ${format(dataSelecionada, 'dd/MM/yyyy')}\n*Horário:* ${horarioSelecionado}\n*Cliente:* ${clienteNome}\n*Telefone:* ${clienteTelefone}\n\nAguardando confirmação.`
-    const numero = '5511999999999' // Substitua pelo número da clínica
+    const numero = '5511999999999'
     const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`
     window.open(url, '_blank')
 
