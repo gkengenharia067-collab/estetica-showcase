@@ -26,7 +26,9 @@ function Servicos() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    carregarServicos()
+    if (typeof window !== 'undefined') {
+      carregarServicos()
+    }
   }, [])
 
   const carregarServicos = () => {
