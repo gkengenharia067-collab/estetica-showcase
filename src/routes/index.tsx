@@ -11,10 +11,12 @@ function Dashboard() {
   const [agendamentos, setAgendamentos] = useState([])
 
   useEffect(() => {
-    const storedServicos = JSON.parse(localStorage.getItem('@clinic/servicos') || '[]')
-    const storedAgendamentos = JSON.parse(localStorage.getItem('@clinic/agendamentos') || '[]')
-    setServicos(storedServicos)
-    setAgendamentos(storedAgendamentos)
+    if (typeof window !== 'undefined') {
+      const storedServicos = JSON.parse(localStorage.getItem('@clinic/servicos') || '[]')
+      const storedAgendamentos = JSON.parse(localStorage.getItem('@clinic/agendamentos') || '[]')
+      setServicos(storedServicos)
+      setAgendamentos(storedAgendamentos)
+    }
   }, [])
 
   const totalServicos = servicos.length
