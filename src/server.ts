@@ -39,13 +39,16 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
-    console.log('🔥 Servidor iniciou!');  // <-- LINHA ADICIONADA
+    console.log('🔍 Request URL:', request.url);
     try {
+      console.log('📦 Importando server entry...');
       const handler = await getServerEntry();
+      console.log('✅ Server entry importado');
       const response = await handler.fetch(request, env, ctx);
+      console.log('✅ Resposta status:', response.status);
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
-      console.error('❌ Erro no SSR:', error);  // <-- LINHA ADICIONADA
+      console.error('❌ Erro no SSR:', error);
       return new Response(renderErrorPage(), {
         status: 500,
         headers: { "content-type": "text/html; charset=utf-8" },
