@@ -11,8 +11,12 @@ let serverEntryPromise: Promise<ServerEntry> | undefined;
 
 async function getServerEntry(): Promise<ServerEntry> {
   if (!serverEntryPromise) {
+    console.log('🔍 Importando entry point...');
     serverEntryPromise = import("@tanstack/react-start/server-entry").then(
-      (m) => (m.default ?? m) as ServerEntry,
+      (m) => {
+        console.log('✅ Entry point importado com sucesso');
+        return (m.default ?? m) as ServerEntry;
+      }
     );
   }
   return serverEntryPromise;
@@ -43,7 +47,7 @@ export default {
     try {
       console.log('📦 Importando server entry...');
       const handler = await getServerEntry();
-      console.log('✅ Server entry importado');
+      console.log('✅ Server entry obtido');
       const response = await handler.fetch(request, env, ctx);
       console.log('✅ Resposta status:', response.status);
       return await normalizeCatastrophicSsrResponse(response);
