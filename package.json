@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "postbuild": "mv .vercel/output/static/index.html .vercel/output/static/_index.html",
+    "postbuild": "echo 'postbuild skipped'",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
