@@ -1,7 +1,5 @@
 {
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/__server.func/(.*)", "dest": "/__server.func/$1" },
-    { "src": "/(.*)", "dest": "/__server.func" }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/__server.func" }
   ]
 }
