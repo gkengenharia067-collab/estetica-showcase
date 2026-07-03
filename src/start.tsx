@@ -1,9 +1,9 @@
-import { createRouter, RouterProvider } from '@tanstack/react-router'
+import { RouterProvider } from '@tanstack/react-router'
 import { createStart } from '@tanstack/react-start'
 import { StrictMode } from 'react'
-import { routeTree } from './routeTree.gen'
+import { getRouter } from './router'
 
-const router = createRouter({ routeTree })
+const router = getRouter()
 
 const Start = createStart(() => (
   <StrictMode>
