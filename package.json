@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tanstack-start dev",
-    "build": "tanstack-start build",
+    "build": "vite build",
     "preview": "tanstack-start preview",
     "lint": "eslint .",
     "format": "prettier --write ."
