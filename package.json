@@ -1,8 +1,13 @@
-"scripts": {
-  "dev": "tanstack-start dev",
-  "build": "tanstack-start build",
-  "preview": "tanstack-start preview",
-  "start": "node .output/server/index.mjs",
-  "lint": "eslint .",
-  "format": "prettier --write ."
+{
+  "name": "tanstack_start_ts",
+  "private": true,
+  "sideEffects": false,
+  "type": "module",
+  "scripts": {
+    "dev": "tanstack-start dev",
+    "build": "tanstack-start build",
+    "preview": "tanstack-start preview",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  }
 }
