@@ -5,24 +5,24 @@ export const Route = createRootRoute({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
-      { title: 'Clínica Showcase – Agendamento de Estética' },
+      { title: 'TESTE-MARCA-12345' },
       { name: 'description', content: 'Agende seus serviços de estética com facilidade.' },
     ],
     links: [
       { rel: 'icon', type: 'image/svg+xml', href: '/vite.svg' },
     ],
   }),
-  component: RootComponent,
+  shellComponent: RootDocument,
 })
 
-function RootComponent() {
+function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
       <head>
         <HeadContent />
       </head>
       <body>
-        <Outlet />
+        {children}
         <Scripts />
       </body>
     </html>
