@@ -1,11 +1,12 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
+import '../styles.css'
 
 export const Route = createRootRoute({
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
-      { title: 'TESTE-MARCA-12345' },
+      { title: 'Clínica Estética' },
       { name: 'description', content: 'Agende seus serviços de estética com facilidade.' },
     ],
     links: [
