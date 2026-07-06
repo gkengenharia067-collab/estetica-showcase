@@ -10,6 +10,16 @@ export const Route = createFileRoute('/catalogo/$id')({
   component: DetalhesServico,
 })
 
+// Normaliza o nome do dia da semana vindo do date-fns (ex: "segunda-feira")
+// para o mesmo formato salvo no cadastro do serviço (ex: "Segunda").
+function normalizarDia(diaSemana: string) {
+  return diaSemana
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace('-feira', '')
+}
+
 function DetalhesServico() {
   const { id } = Route.useParams()
   const [servico, setServico] = useState(null)
@@ -35,8 +45,8 @@ function DetalhesServico() {
     if (!servico) return
     const dataStr = format(dataSelecionada, 'yyyy-MM-dd')
     const diaSemana = format(dataSelecionada, 'EEEE', { locale: ptBR })
-    const diaNormalizado = diaSemana.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-    const diasDisponiveis = servico.diasSemana.map(d => d.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase())
+    const diaNormalizado = normalizarDia(diaSemana)
+    const diasDisponiveis = servico.diasSemana.map(d => normalizarDia(d))
 
     if (!diasDisponiveis.includes(diaNormalizado)) {
       setHorariosDisponiveis([])
@@ -104,8 +114,8 @@ function DetalhesServico() {
   const tileDisabled = ({ date }) => {
     if (isPast(date) && !isToday(date)) return true
     const diaSemana = format(date, 'EEEE', { locale: ptBR })
-    const diaNormalizado = diaSemana.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-    const diasDisponiveis = servico.diasSemana.map(d => d.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase())
+    const diaNormalizado = normalizarDia(diaSemana)
+    const diasDisponiveis = servico.diasSemana.map(d => normalizarDia(d))
     return !diasDisponiveis.includes(diaNormalizado)
   }
 
