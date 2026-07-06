@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ServicosRouteImport } from './routes/servicos'
+import { Route as AgendamentosRouteImport } from './routes/agendamentos'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CatalogoIndexRouteImport } from './routes/catalogo.index'
 import { Route as CatalogoIdRouteImport } from './routes/catalogo.$id'
@@ -17,6 +18,11 @@ import { Route as CatalogoIdRouteImport } from './routes/catalogo.$id'
 const ServicosRoute = ServicosRouteImport.update({
   id: '/servicos',
   path: '/servicos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgendamentosRoute = AgendamentosRouteImport.update({
+  id: '/agendamentos',
+  path: '/agendamentos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -37,12 +43,14 @@ const CatalogoIdRoute = CatalogoIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agendamentos': typeof AgendamentosRoute
   '/servicos': typeof ServicosRoute
   '/catalogo/$id': typeof CatalogoIdRoute
   '/catalogo/': typeof CatalogoIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agendamentos': typeof AgendamentosRoute
   '/servicos': typeof ServicosRoute
   '/catalogo/$id': typeof CatalogoIdRoute
   '/catalogo': typeof CatalogoIndexRoute
@@ -50,20 +58,29 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/agendamentos': typeof AgendamentosRoute
   '/servicos': typeof ServicosRoute
   '/catalogo/$id': typeof CatalogoIdRoute
   '/catalogo/': typeof CatalogoIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/servicos' | '/catalogo/$id' | '/catalogo/'
+  fullPaths:
+    '/' | '/agendamentos' | '/servicos' | '/catalogo/$id' | '/catalogo/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/servicos' | '/catalogo/$id' | '/catalogo'
-  id: '__root__' | '/' | '/servicos' | '/catalogo/$id' | '/catalogo/'
+  to: '/' | '/agendamentos' | '/servicos' | '/catalogo/$id' | '/catalogo'
+  id:
+    | '__root__'
+    | '/'
+    | '/agendamentos'
+    | '/servicos'
+    | '/catalogo/$id'
+    | '/catalogo/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AgendamentosRoute: typeof AgendamentosRoute
   ServicosRoute: typeof ServicosRoute
   CatalogoIdRoute: typeof CatalogoIdRoute
   CatalogoIndexRoute: typeof CatalogoIndexRoute
@@ -76,6 +93,13 @@ declare module '@tanstack/react-router' {
       path: '/servicos'
       fullPath: '/servicos'
       preLoaderRoute: typeof ServicosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agendamentos': {
+      id: '/agendamentos'
+      path: '/agendamentos'
+      fullPath: '/agendamentos'
+      preLoaderRoute: typeof AgendamentosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -104,6 +128,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AgendamentosRoute: AgendamentosRoute,
   ServicosRoute: ServicosRoute,
   CatalogoIdRoute: CatalogoIdRoute,
   CatalogoIndexRoute: CatalogoIndexRoute,

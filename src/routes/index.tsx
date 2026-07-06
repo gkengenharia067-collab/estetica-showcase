@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { CalendarDays, Sparkles, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
@@ -32,7 +32,7 @@ function Dashboard() {
       <p className="text-gray-600 mb-6">Dashboard – visão geral da sua clínica</p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-md border border-pink-100">
+        <Link to="/servicos" className="bg-white p-6 rounded-xl shadow-md border border-pink-100 hover:shadow-lg transition block">
           <div className="flex items-center gap-3">
             <Sparkles className="w-8 h-8 text-pink-500" />
             <div>
@@ -40,8 +40,8 @@ function Dashboard() {
               <p className="text-2xl font-bold">{totalServicos}</p>
             </div>
           </div>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-md border border-pink-100">
+        </Link>
+        <Link to="/agendamentos" className="bg-white p-6 rounded-xl shadow-md border border-pink-100 hover:shadow-lg transition block">
           <div className="flex items-center gap-3">
             <CalendarDays className="w-8 h-8 text-blue-500" />
             <div>
@@ -49,8 +49,8 @@ function Dashboard() {
               <p className="text-2xl font-bold">{totalAgendamentos}</p>
             </div>
           </div>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-md border border-pink-100">
+        </Link>
+        <Link to="/agendamentos" className="bg-white p-6 rounded-xl shadow-md border border-pink-100 hover:shadow-lg transition block">
           <div className="flex items-center gap-3">
             <Users className="w-8 h-8 text-green-500" />
             <div>
@@ -58,16 +58,19 @@ function Dashboard() {
               <p className="text-2xl font-bold">{agendamentosHoje}</p>
             </div>
           </div>
-        </div>
+        </Link>
       </div>
 
       <div className="mt-8 flex gap-4">
-        <a href="/servicos" className="bg-pink-500 text-white px-6 py-3 rounded-lg hover:bg-pink-600 transition">
+        <Link to="/servicos" className="bg-pink-500 text-white px-6 py-3 rounded-lg hover:bg-pink-600 transition">
           Gerenciar Serviços
-        </a>
-        <a href="/catalogo" className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition">
+        </Link>
+        <Link to="/catalogo" className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition">
           Ver Catálogo Público
-        </a>
+        </Link>
+        <Link to="/agendamentos" className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition">
+          Ver Agendamentos
+        </Link>
       </div>
     </div>
   )
