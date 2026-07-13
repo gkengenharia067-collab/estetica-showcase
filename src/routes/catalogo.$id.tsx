@@ -6,6 +6,7 @@ import { ptBR } from 'date-fns/locale'
 import { CalendarDays, Clock, User, Phone, Sparkles } from 'lucide-react'
 import 'react-calendar/dist/Calendar.css'
 import { storeConfig } from '../config/store.config'
+import { storage } from '../services/storage.service'
 
 export const Route = createFileRoute('/catalogo/$id')({
   component: DetalhesServico,
@@ -32,18 +33,12 @@ function DetalhesServico() {
   const [horariosDisponiveis, setHorariosDisponiveis] = useState([])
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedServicos = JSON.parse(
-        localStorage.getItem(`${storeConfig.storagePrefix}/servicos`) || '[]'
-      )
-      const found = storedServicos.find(s => s.id === id)
-      setServico(found)
+    const storedServicos = storage.get('servicos', [])
+    const found = storedServicos.find(s => s.id === id)
+    setServico(found)
 
-      const storedAgendamentos = JSON.parse(
-        localStorage.getItem(`${storeConfig.storagePrefix}/agendamentos`) || '[]'
-      )
-      setAgendamentos(storedAgendamentos)
-    }
+    const storedAgendamentos = storage.get('agendamentos', [])
+    setAgendamentos(storedAgendamentos)
   }, [id])
 
   useEffect(() => {
@@ -100,7 +95,7 @@ function DetalhesServico() {
     }
 
     const updated = [...agendamentos, novoAgendamento]
-    localStorage.setItem(`${storeConfig.storagePrefix}/agendamentos`, JSON.stringify(updated))
+    storage.set('agendamentos', updated)
     setAgendamentos(updated)
 
     const mensagem = `Olá! Gostaria de confirmar meu agendamento:\n\n*Serviço:* ${servico.nome}\n*Data:* ${format(dataSelecionada, 'dd/MM/yyyy')}\n*Horário:* ${horarioSelecionado}\n*Cliente:* ${clienteNome}\n*Telefone:* ${clienteTelefone}\n\nAguardando confirmação.`

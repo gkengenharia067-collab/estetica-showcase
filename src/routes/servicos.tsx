@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useEffect, useRef } from 'react'
 import { Sparkles, ArrowLeft, Upload, Link2, X } from 'lucide-react'
-import { storeConfig } from '../config/store.config'
+import { storage } from '../services/storage.service'
 
 export const Route = createFileRoute('/servicos')({
   component: Servicos,
@@ -27,20 +27,15 @@ function Servicos() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      carregarServicos()
-    }
+    carregarServicos()
   }, [])
 
   const carregarServicos = () => {
-    const stored = JSON.parse(
-      localStorage.getItem(`${storeConfig.storagePrefix}/servicos`) || '[]'
-    )
-    setServicos(stored)
+    setServicos(storage.get('servicos', []))
   }
 
   const salvarServicos = (novos) => {
-    localStorage.setItem(`${storeConfig.storagePrefix}/servicos`, JSON.stringify(novos))
+    storage.set('servicos', novos)
     carregarServicos()
   }
 

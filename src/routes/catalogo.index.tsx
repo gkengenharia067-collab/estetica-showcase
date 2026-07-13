@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { Sparkles, ArrowLeft } from 'lucide-react'
-import { storeConfig } from '../config/store.config'
+import { storage } from '../services/storage.service'
 
 export const Route = createFileRoute('/catalogo/')({
   component: Catalogo,
@@ -10,12 +10,7 @@ export const Route = createFileRoute('/catalogo/')({
 function Catalogo() {
   const [servicos, setServicos] = useState([])
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = JSON.parse(
-        localStorage.getItem(`${storeConfig.storagePrefix}/servicos`) || '[]'
-      )
-      setServicos(stored)
-    }
+    setServicos(storage.get('servicos', []))
   }, [])
   return (
     <div className="p-6 max-w-6xl mx-auto">
