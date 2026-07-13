@@ -1,13 +1,14 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
 import '../styles.css'
+import { storeConfig } from '../config/store.config'
 
 export const Route = createRootRoute({
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
-      { title: 'Clínica Estética' },
-      { name: 'description', content: 'Agende seus serviços de estética com facilidade.' },
+      { title: storeConfig.nome },
+      { name: 'description', content: storeConfig.descricao },
     ],
     links: [
       { rel: 'icon', type: 'image/svg+xml', href: '/vite.svg' },

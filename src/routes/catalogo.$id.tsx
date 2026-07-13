@@ -5,6 +5,7 @@ import { format, isToday, isPast } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { CalendarDays, Clock, User, Phone, Sparkles } from 'lucide-react'
 import 'react-calendar/dist/Calendar.css'
+import { storeConfig } from '../config/store.config'
 
 export const Route = createFileRoute('/catalogo/$id')({
   component: DetalhesServico,
@@ -32,11 +33,15 @@ function DetalhesServico() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedServicos = JSON.parse(localStorage.getItem('@clinic/servicos') || '[]')
+      const storedServicos = JSON.parse(
+        localStorage.getItem(`${storeConfig.storagePrefix}/servicos`) || '[]'
+      )
       const found = storedServicos.find(s => s.id === id)
       setServico(found)
 
-      const storedAgendamentos = JSON.parse(localStorage.getItem('@clinic/agendamentos') || '[]')
+      const storedAgendamentos = JSON.parse(
+        localStorage.getItem(`${storeConfig.storagePrefix}/agendamentos`) || '[]'
+      )
       setAgendamentos(storedAgendamentos)
     }
   }, [id])
@@ -95,12 +100,11 @@ function DetalhesServico() {
     }
 
     const updated = [...agendamentos, novoAgendamento]
-    localStorage.setItem('@clinic/agendamentos', JSON.stringify(updated))
+    localStorage.setItem(`${storeConfig.storagePrefix}/agendamentos`, JSON.stringify(updated))
     setAgendamentos(updated)
 
     const mensagem = `Olá! Gostaria de confirmar meu agendamento:\n\n*Serviço:* ${servico.nome}\n*Data:* ${format(dataSelecionada, 'dd/MM/yyyy')}\n*Horário:* ${horarioSelecionado}\n*Cliente:* ${clienteNome}\n*Telefone:* ${clienteTelefone}\n\nAguardando confirmação.`
-    const numero = '5511999999999'
-    const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`
+    const url = `https://wa.me/${storeConfig.whatsappNumero}?text=${encodeURIComponent(mensagem)}`
     window.open(url, '_blank')
 
     alert('Agendamento realizado com sucesso! Você será redirecionado ao WhatsApp para finalizar.')

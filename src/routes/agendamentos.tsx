@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { ArrowLeft, CalendarDays, User, Phone, Trash2 } from 'lucide-react'
+import { storeConfig } from '../config/store.config'
 
 export const Route = createFileRoute('/agendamentos')({
   component: Agendamentos,
@@ -18,8 +19,12 @@ function Agendamentos() {
   }, [])
 
   const carregar = () => {
-    const storedAgendamentos = JSON.parse(localStorage.getItem('@clinic/agendamentos') || '[]')
-    const storedServicos = JSON.parse(localStorage.getItem('@clinic/servicos') || '[]')
+    const storedAgendamentos = JSON.parse(
+      localStorage.getItem(`${storeConfig.storagePrefix}/agendamentos`) || '[]'
+    )
+    const storedServicos = JSON.parse(
+      localStorage.getItem(`${storeConfig.storagePrefix}/servicos`) || '[]'
+    )
     setAgendamentos(storedAgendamentos)
     setServicos(storedServicos)
   }
@@ -34,14 +39,14 @@ function Agendamentos() {
     const atualizados = agendamentos.map(a =>
       a.id === id ? { ...a, status: 'cancelado' } : a
     )
-    localStorage.setItem('@clinic/agendamentos', JSON.stringify(atualizados))
+    localStorage.setItem(`${storeConfig.storagePrefix}/agendamentos`, JSON.stringify(atualizados))
     setAgendamentos(atualizados)
   }
 
   const handleRemover = (id) => {
     if (!confirm('Remover este agendamento permanentemente?')) return
     const atualizados = agendamentos.filter(a => a.id !== id)
-    localStorage.setItem('@clinic/agendamentos', JSON.stringify(atualizados))
+    localStorage.setItem(`${storeConfig.storagePrefix}/agendamentos`, JSON.stringify(atualizados))
     setAgendamentos(atualizados)
   }
 
