@@ -39,6 +39,19 @@ function Servicos() {
     carregarServicos()
   }
 
+  // Cancela (sem apagar) todos os agendamentos ainda ativos vinculados
+  // a um serviço específico. Usado quando o serviço é excluído, para que
+  // nenhum horário fique "preso" a um serviço que não existe mais.
+  const cancelarAgendamentosDoServico = (servicoId: string) => {
+    const agendamentos = storage.get('agendamentos', [])
+    const atualizados = agendamentos.map(a =>
+      a.servicoId === servicoId && a.status !== 'cancelado'
+        ? { ...a, status: 'cancelado', canceladoPorExclusaoDeServico: true }
+        : a
+    )
+    storage.set('agendamentos', atualizados)
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
     const novo = {
@@ -60,10 +73,10 @@ function Servicos() {
   }
 
   const handleDelete = (id) => {
-    if (confirm('Remover serviço?')) {
-      const lista = servicos.filter(s => s.id !== id)
-      salvarServicos(lista)
-    }
+    if (!confirm('Remover serviço? Os agendamentos já feitos para ele serão cancelados automaticamente.')) return
+    cancelarAgendamentosDoServico(id)
+    const lista = servicos.filter(s => s.id !== id)
+    salvarServicos(lista)
   }
 
   const handleEdit = (servico) => {
