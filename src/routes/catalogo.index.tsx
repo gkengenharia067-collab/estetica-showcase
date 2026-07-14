@@ -7,6 +7,16 @@ export const Route = createFileRoute('/catalogo/')({
   component: Catalogo,
 })
 
+// Placeholder mostrado quando a URL da imagem do serviço não carrega.
+const IMAGEM_INDISPONIVEL =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+      <rect width="400" height="300" fill="#f3f4f6"/>
+      <text x="200" y="150" font-family="sans-serif" font-size="16" fill="#9ca3af" text-anchor="middle">Imagem indisponível</text>
+    </svg>`
+  )
+
 function Catalogo() {
   const [servicos, setServicos] = useState([])
   useEffect(() => {
@@ -28,7 +38,17 @@ function Catalogo() {
         {servicos.map(servico => (
           <Link key={servico.id} to={`/catalogo/${servico.id}`} className="block">
             <div className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition border border-pink-100">
-              {servico.imagem && <img src={servico.imagem} alt={servico.nome} className="w-full h-48 object-cover rounded-lg" />}
+              {servico.imagem && (
+                <img
+                  src={servico.imagem}
+                  alt={servico.nome}
+                  className="w-full h-48 object-cover rounded-lg"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null
+                    e.currentTarget.src = IMAGEM_INDISPONIVEL
+                  }}
+                />
+              )}
               <h2 className="font-bold text-xl mt-2">{servico.nome}</h2>
               <p className="text-sm text-gray-600 line-clamp-2">{servico.descricao}</p>
               <p className="text-pink-600 font-bold mt-1">R$ {servico.preco}</p>

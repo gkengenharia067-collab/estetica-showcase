@@ -12,6 +12,16 @@ export const Route = createFileRoute('/catalogo/$id')({
   component: DetalhesServico,
 })
 
+// Placeholder mostrado quando a URL da imagem do serviço não carrega.
+const IMAGEM_INDISPONIVEL =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+      <rect width="400" height="300" fill="#f3f4f6"/>
+      <text x="200" y="150" font-family="sans-serif" font-size="16" fill="#9ca3af" text-anchor="middle">Imagem indisponível</text>
+    </svg>`
+  )
+
 // Normaliza o nome do dia da semana vindo do date-fns (ex: "segunda-feira")
 // para o mesmo formato salvo no cadastro do serviço (ex: "Segunda").
 function normalizarDia(diaSemana: string) {
@@ -121,7 +131,17 @@ function DetalhesServico() {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-pink-100">
-        {servico.imagem && <img src={servico.imagem} alt={servico.nome} className="w-full h-64 object-cover" />}
+        {servico.imagem && (
+          <img
+            src={servico.imagem}
+            alt={servico.nome}
+            className="w-full h-64 object-cover"
+            onError={(e) => {
+              e.currentTarget.onerror = null
+              e.currentTarget.src = IMAGEM_INDISPONIVEL
+            }}
+          />
+        )}
         <div className="p-6">
           <h1 className="text-3xl font-bold text-pink-600">{servico.nome}</h1>
           <p className="text-gray-600 mt-2">{servico.descricao}</p>

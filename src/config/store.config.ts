@@ -27,4 +27,11 @@ export const storeConfig = {
     secundaria: 'blue', // cor usada em botões/ícones secundários
     destaque: 'green',  // cor usada em indicadores de sucesso/confirmação
   },
+
+  // Senha de acesso ao painel administrativo (/servicos e /agendamentos).
+  // ATENÇÃO: isso é apenas uma trava simples contra acesso casual, NÃO é
+  // segurança de verdade — o valor fica visível no código enviado ao navegador.
+  // A autenticação real (com hash de senha e validação no servidor) será
+  // implementada na migração para Supabase.
+  adminSenha: 'clinica2026',
 }

@@ -1,10 +1,15 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { ArrowLeft, CalendarDays, User, Phone, Trash2 } from 'lucide-react'
+import { ArrowLeft, CalendarDays, User, Phone, Trash2, Wand2 } from 'lucide-react'
 import { storage } from '../services/storage.service'
+import { RequireAuth } from '../components/RequireAuth'
 
 export const Route = createFileRoute('/agendamentos')({
-  component: Agendamentos,
+  component: () => (
+    <RequireAuth>
+      <Agendamentos />
+    </RequireAuth>
+  ),
 })
 
 function Agendamentos() {
@@ -42,6 +47,34 @@ function Agendamentos() {
     setAgendamentos(atualizados)
   }
 
+  // Limpeza única: cancela agendamentos antigos que ficaram "órfãos"
+  // (vinculados a um serviço que já não existe mais), criados antes da
+  // correção automática ter sido adicionada ao excluir serviços.
+  const handleLimparOrfaos = () => {
+    const idsServicosExistentes = servicos.map(s => s.id)
+    const orfaos = agendamentos.filter(
+      a => a.status !== 'cancelado' && !idsServicosExistentes.includes(a.servicoId)
+    )
+
+    if (orfaos.length === 0) {
+      alert('Nenhum agendamento órfão encontrado. Tudo certo!')
+      return
+    }
+
+    if (!confirm(`Encontrado(s) ${orfaos.length} agendamento(s) vinculado(s) a serviços que não existem mais. Cancelar automaticamente (sem apagar o histórico)?`)) {
+      return
+    }
+
+    const atualizados = agendamentos.map(a =>
+      orfaos.some(o => o.id === a.id)
+        ? { ...a, status: 'cancelado', canceladoPorExclusaoDeServico: true }
+        : a
+    )
+    storage.set('agendamentos', atualizados)
+    setAgendamentos(atualizados)
+    alert(`${orfaos.length} agendamento(s) cancelado(s) com sucesso.`)
+  }
+
   const hojeStr = new Date().toISOString().slice(0, 10)
 
   const listaFiltrada = agendamentos
@@ -59,10 +92,19 @@ function Agendamentos() {
         Voltar ao Dashboard
       </Link>
 
-      <h1 className="text-2xl font-bold text-pink-600 flex items-center gap-2">
-        <CalendarDays className="w-6 h-6" />
-        Agendamentos
-      </h1>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <h1 className="text-2xl font-bold text-pink-600 flex items-center gap-2">
+          <CalendarDays className="w-6 h-6" />
+          Agendamentos
+        </h1>
+        <button
+          onClick={handleLimparOrfaos}
+          className="inline-flex items-center gap-2 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition text-sm self-start md:self-auto"
+        >
+          <Wand2 className="w-4 h-4" />
+          Limpar agendamentos órfãos
+        </button>
+      </div>
 
       <div className="flex gap-2 mt-4 mb-6">
         {[

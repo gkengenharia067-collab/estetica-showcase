@@ -2,13 +2,28 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useEffect, useRef } from 'react'
 import { Sparkles, ArrowLeft, Upload, Link2, X } from 'lucide-react'
 import { storage } from '../services/storage.service'
+import { RequireAuth } from '../components/RequireAuth'
 
 export const Route = createFileRoute('/servicos')({
-  component: Servicos,
+  component: () => (
+    <RequireAuth>
+      <Servicos />
+    </RequireAuth>
+  ),
 })
 
 const DIAS_SEMANA = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
 const HORARIOS = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00']
+
+// Placeholder mostrado quando a URL da imagem do serviço não carrega.
+const IMAGEM_INDISPONIVEL =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+      <rect width="400" height="300" fill="#f3f4f6"/>
+      <text x="200" y="150" font-family="sans-serif" font-size="16" fill="#9ca3af" text-anchor="middle">Imagem indisponível</text>
+    </svg>`
+  )
 
 function Servicos() {
   const [servicos, setServicos] = useState([])
@@ -221,7 +236,15 @@ function Servicos() {
               </div>
               {previewImagem && (
                 <div className="mt-2">
-                  <img src={previewImagem} alt="Preview" className="h-24 w-auto object-contain rounded border" />
+                  <img
+                    src={previewImagem}
+                    alt="Preview"
+                    className="h-24 w-auto object-contain rounded border"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null
+                      e.currentTarget.src = IMAGEM_INDISPONIVEL
+                    }}
+                  />
                 </div>
               )}
             </div>
@@ -286,7 +309,17 @@ function Servicos() {
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {servicos.map(servico => (
           <div key={servico.id} className="bg-white p-4 rounded-xl shadow-md border border-pink-100">
-            {servico.imagem && <img src={servico.imagem} alt={servico.nome} className="w-full h-40 object-cover rounded-lg" />}
+            {servico.imagem && (
+              <img
+                src={servico.imagem}
+                alt={servico.nome}
+                className="w-full h-40 object-cover rounded-lg"
+                onError={(e) => {
+                  e.currentTarget.onerror = null
+                  e.currentTarget.src = IMAGEM_INDISPONIVEL
+                }}
+              />
+            )}
             <h3 className="font-bold text-lg mt-2">{servico.nome}</h3>
             <p className="text-sm text-gray-600">{servico.descricao}</p>
             <p className="text-pink-600 font-bold">R$ {servico.preco}</p>
