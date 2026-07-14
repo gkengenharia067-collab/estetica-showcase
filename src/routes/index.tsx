@@ -2,7 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { CalendarDays, Sparkles, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { storeConfig } from '../config/store.config'
-import { storage } from '../services/storage.service'
+import { storageSupabase } from '../services/storage.supabase.service'
 import { RequireAuth } from '../components/RequireAuth'
 
 export const Route = createFileRoute('/')({
@@ -14,13 +14,27 @@ export const Route = createFileRoute('/')({
 })
 
 function Dashboard() {
+  const [carregando, setCarregando] = useState(true)
   const [servicos, setServicos] = useState([])
   const [agendamentos, setAgendamentos] = useState([])
 
   useEffect(() => {
-    setServicos(storage.get('servicos', []))
-    setAgendamentos(storage.get('agendamentos', []))
+    async function carregar() {
+      setCarregando(true)
+      const [listaServicos, listaAgendamentos] = await Promise.all([
+        storageSupabase.get('servicos', []),
+        storageSupabase.get('agendamentos', []),
+      ])
+      setServicos(listaServicos)
+      setAgendamentos(listaAgendamentos)
+      setCarregando(false)
+    }
+    carregar()
   }, [])
+
+  if (carregando) {
+    return <div className="p-6 text-gray-500">Carregando...</div>
+  }
 
   const totalServicos = servicos.length
   const totalAgendamentos = agendamentos.length

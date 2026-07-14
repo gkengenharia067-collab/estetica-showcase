@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { Sparkles, ArrowLeft } from 'lucide-react'
-import { storage } from '../services/storage.service'
+import { storageSupabase } from '../services/storage.supabase.service'
 
 export const Route = createFileRoute('/catalogo/')({
   component: Catalogo,
@@ -18,10 +18,23 @@ const IMAGEM_INDISPONIVEL =
   )
 
 function Catalogo() {
+  const [carregando, setCarregando] = useState(true)
   const [servicos, setServicos] = useState([])
+
   useEffect(() => {
-    setServicos(storage.get('servicos', []))
+    async function carregar() {
+      setCarregando(true)
+      const lista = await storageSupabase.get('servicos', [])
+      setServicos(lista)
+      setCarregando(false)
+    }
+    carregar()
   }, [])
+
+  if (carregando) {
+    return <div className="p-6 text-gray-500">Carregando...</div>
+  }
+
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <Link to="/" className="inline-flex items-center gap-2 text-pink-600 hover:text-pink-800 mb-4 transition">

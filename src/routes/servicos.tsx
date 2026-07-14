@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useEffect, useRef } from 'react'
 import { Sparkles, ArrowLeft, Upload, Link2, X } from 'lucide-react'
-import { storage } from '../services/storage.service'
+import { storageSupabase } from '../services/storage.supabase.service'
 import { RequireAuth } from '../components/RequireAuth'
 
 export const Route = createFileRoute('/servicos')({
@@ -26,6 +26,8 @@ const IMAGEM_INDISPONIVEL =
   )
 
 function Servicos() {
+  const [carregando, setCarregando] = useState(true)
+  const [salvando, setSalvando] = useState(false)
   const [servicos, setServicos] = useState([])
   const [editando, setEditando] = useState(null)
   const [form, setForm] = useState({
@@ -45,29 +47,37 @@ function Servicos() {
     carregarServicos()
   }, [])
 
-  const carregarServicos = () => {
-    setServicos(storage.get('servicos', []))
+  const carregarServicos = async () => {
+    setCarregando(true)
+    const lista = await storageSupabase.get('servicos', [])
+    setServicos(lista)
+    setCarregando(false)
   }
 
-  const salvarServicos = (novos) => {
-    storage.set('servicos', novos)
-    carregarServicos()
+  const salvarServicos = async (novos) => {
+    setSalvando(true)
+    await storageSupabase.set('servicos', novos)
+    // Atualiza a tela direto com os dados que acabamos de mandar salvar,
+    // em vez de buscar tudo de novo do banco (evita uma 3ª ida e volta
+    // pela internet, deixando o cadastro/edição mais rápido).
+    setServicos(novos)
+    setSalvando(false)
   }
 
   // Cancela (sem apagar) todos os agendamentos ainda ativos vinculados
   // a um serviço específico. Usado quando o serviço é excluído, para que
   // nenhum horário fique "preso" a um serviço que não existe mais.
-  const cancelarAgendamentosDoServico = (servicoId: string) => {
-    const agendamentos = storage.get('agendamentos', [])
+  const cancelarAgendamentosDoServico = async (servicoId: string) => {
+    const agendamentos = await storageSupabase.get('agendamentos', [])
     const atualizados = agendamentos.map(a =>
       a.servicoId === servicoId && a.status !== 'cancelado'
         ? { ...a, status: 'cancelado', canceladoPorExclusaoDeServico: true }
         : a
     )
-    storage.set('agendamentos', atualizados)
+    await storageSupabase.set('agendamentos', atualizados)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const novo = {
       id: editando ? editando.id : Date.now().toString(),
@@ -81,17 +91,17 @@ function Servicos() {
     } else {
       lista.push(novo)
     }
-    salvarServicos(lista)
+    await salvarServicos(lista)
     setForm({ nome: '', descricao: '', preco: '', duracao: '60', imagem: '', categoria: '', diasSemana: [], horarios: [] })
     setPreviewImagem('')
     setEditando(null)
   }
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!confirm('Remover serviço? Os agendamentos já feitos para ele serão cancelados automaticamente.')) return
-    cancelarAgendamentosDoServico(id)
+    await cancelarAgendamentosDoServico(id)
     const lista = servicos.filter(s => s.id !== id)
-    salvarServicos(lista)
+    await salvarServicos(lista)
   }
 
   const handleEdit = (servico) => {
@@ -135,6 +145,10 @@ function Servicos() {
     setForm({ ...form, imagem: '' })
     setPreviewImagem('')
     if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  if (carregando) {
+    return <div className="p-6 text-gray-500">Carregando...</div>
   }
 
   return (
@@ -295,8 +309,12 @@ function Servicos() {
           </div>
         </div>
         <div className="mt-4 flex gap-3">
-          <button type="submit" className="bg-pink-500 text-white px-6 py-2 rounded-lg hover:bg-pink-600 transition">
-            {editando ? 'Atualizar' : 'Cadastrar'}
+          <button
+            type="submit"
+            disabled={salvando}
+            className="bg-pink-500 text-white px-6 py-2 rounded-lg hover:bg-pink-600 transition disabled:opacity-50"
+          >
+            {salvando ? 'Salvando...' : editando ? 'Atualizar' : 'Cadastrar'}
           </button>
           {editando && (
             <button type="button" onClick={() => { setEditando(null); setForm({ nome: '', descricao: '', preco: '', duracao: '60', imagem: '', categoria: '', diasSemana: [], horarios: [] }); setPreviewImagem('') }} className="bg-gray-300 px-6 py-2 rounded-lg">

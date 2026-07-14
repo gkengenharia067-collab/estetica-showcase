@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { ArrowLeft, CalendarDays, User, Phone, Trash2, Wand2 } from 'lucide-react'
-import { storage } from '../services/storage.service'
+import { storageSupabase } from '../services/storage.supabase.service'
 import { RequireAuth } from '../components/RequireAuth'
 
 export const Route = createFileRoute('/agendamentos')({
@@ -13,6 +13,7 @@ export const Route = createFileRoute('/agendamentos')({
 })
 
 function Agendamentos() {
+  const [carregando, setCarregando] = useState(true)
   const [agendamentos, setAgendamentos] = useState([])
   const [servicos, setServicos] = useState([])
   const [filtro, setFiltro] = useState('todos') // todos | hoje | futuros
@@ -21,9 +22,15 @@ function Agendamentos() {
     carregar()
   }, [])
 
-  const carregar = () => {
-    setAgendamentos(storage.get('agendamentos', []))
-    setServicos(storage.get('servicos', []))
+  const carregar = async () => {
+    setCarregando(true)
+    const [listaAgendamentos, listaServicos] = await Promise.all([
+      storageSupabase.get('agendamentos', []),
+      storageSupabase.get('servicos', []),
+    ])
+    setAgendamentos(listaAgendamentos)
+    setServicos(listaServicos)
+    setCarregando(false)
   }
 
   const nomeServico = (servicoId) => {
@@ -31,26 +38,25 @@ function Agendamentos() {
     return s ? s.nome : 'Serviço removido'
   }
 
-  const handleCancelar = (id) => {
+  const handleCancelar = async (id) => {
     if (!confirm('Cancelar este agendamento?')) return
     const atualizados = agendamentos.map(a =>
       a.id === id ? { ...a, status: 'cancelado' } : a
     )
-    storage.set('agendamentos', atualizados)
+    await storageSupabase.set('agendamentos', atualizados)
     setAgendamentos(atualizados)
   }
 
-  const handleRemover = (id) => {
+  const handleRemover = async (id) => {
     if (!confirm('Remover este agendamento permanentemente?')) return
     const atualizados = agendamentos.filter(a => a.id !== id)
-    storage.set('agendamentos', atualizados)
+    await storageSupabase.set('agendamentos', atualizados)
     setAgendamentos(atualizados)
   }
 
   // Limpeza única: cancela agendamentos antigos que ficaram "órfãos"
-  // (vinculados a um serviço que já não existe mais), criados antes da
-  // correção automática ter sido adicionada ao excluir serviços.
-  const handleLimparOrfaos = () => {
+  // (vinculados a um serviço que já não existe mais).
+  const handleLimparOrfaos = async () => {
     const idsServicosExistentes = servicos.map(s => s.id)
     const orfaos = agendamentos.filter(
       a => a.status !== 'cancelado' && !idsServicosExistentes.includes(a.servicoId)
@@ -70,9 +76,13 @@ function Agendamentos() {
         ? { ...a, status: 'cancelado', canceladoPorExclusaoDeServico: true }
         : a
     )
-    storage.set('agendamentos', atualizados)
+    await storageSupabase.set('agendamentos', atualizados)
     setAgendamentos(atualizados)
     alert(`${orfaos.length} agendamento(s) cancelado(s) com sucesso.`)
+  }
+
+  if (carregando) {
+    return <div className="p-6 text-gray-500">Carregando...</div>
   }
 
   const hojeStr = new Date().toISOString().slice(0, 10)

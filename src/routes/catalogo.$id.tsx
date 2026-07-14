@@ -6,7 +6,7 @@ import { ptBR } from 'date-fns/locale'
 import { CalendarDays, Clock, User, Phone, Sparkles } from 'lucide-react'
 import 'react-calendar/dist/Calendar.css'
 import { storeConfig } from '../config/store.config'
-import { storage } from '../services/storage.service'
+import { storageSupabase } from '../services/storage.supabase.service'
 
 export const Route = createFileRoute('/catalogo/$id')({
   component: DetalhesServico,
@@ -34,6 +34,8 @@ function normalizarDia(diaSemana: string) {
 
 function DetalhesServico() {
   const { id } = Route.useParams()
+  const [carregando, setCarregando] = useState(true)
+  const [agendando, setAgendando] = useState(false)
   const [servico, setServico] = useState(null)
   const [agendamentos, setAgendamentos] = useState([])
   const [dataSelecionada, setDataSelecionada] = useState(new Date())
@@ -43,12 +45,17 @@ function DetalhesServico() {
   const [horariosDisponiveis, setHorariosDisponiveis] = useState([])
 
   useEffect(() => {
-    const storedServicos = storage.get('servicos', [])
-    const found = storedServicos.find(s => s.id === id)
-    setServico(found)
+    async function carregar() {
+      setCarregando(true)
+      const storedServicos = await storageSupabase.get('servicos', [])
+      const found = storedServicos.find(s => s.id === id)
+      setServico(found)
 
-    const storedAgendamentos = storage.get('agendamentos', [])
-    setAgendamentos(storedAgendamentos)
+      const storedAgendamentos = await storageSupabase.get('agendamentos', [])
+      setAgendamentos(storedAgendamentos)
+      setCarregando(false)
+    }
+    carregar()
   }, [id])
 
   useEffect(() => {
@@ -86,11 +93,13 @@ function DetalhesServico() {
     setHorarioSelecionado('')
   }, [dataSelecionada, servico, agendamentos, id])
 
-  const handleAgendar = () => {
+  const handleAgendar = async () => {
     if (!clienteNome || !clienteTelefone || !horarioSelecionado) {
       alert('Preencha todos os campos e selecione um horário.')
       return
     }
+
+    setAgendando(true)
 
     const dataStr = format(dataSelecionada, 'yyyy-MM-dd')
     const novoAgendamento = {
@@ -101,11 +110,12 @@ function DetalhesServico() {
       clienteNome,
       clienteTelefone,
       status: 'confirmado',
-      criadoEm: new Date().toISOString(),
     }
 
     const updated = [...agendamentos, novoAgendamento]
-    storage.set('agendamentos', updated)
+    await storageSupabase.set('agendamentos', updated)
+    // Atualiza a tela direto com os dados que acabamos de salvar, sem
+    // buscar tudo de novo (evita uma ida e volta desnecessária pela internet).
     setAgendamentos(updated)
 
     const mensagem = `Olá! Gostaria de confirmar meu agendamento:\n\n*Serviço:* ${servico.nome}\n*Data:* ${format(dataSelecionada, 'dd/MM/yyyy')}\n*Horário:* ${horarioSelecionado}\n*Cliente:* ${clienteNome}\n*Telefone:* ${clienteTelefone}\n\nAguardando confirmação.`
@@ -116,6 +126,11 @@ function DetalhesServico() {
     setClienteNome('')
     setClienteTelefone('')
     setHorarioSelecionado('')
+    setAgendando(false)
+  }
+
+  if (carregando) {
+    return <div className="p-6 text-gray-500">Carregando...</div>
   }
 
   if (!servico) return <div className="p-6">Serviço não encontrado.</div>
@@ -225,10 +240,11 @@ function DetalhesServico() {
                 </div>
                 <button
                   onClick={handleAgendar}
-                  className="w-full bg-pink-500 text-white py-3 rounded-lg hover:bg-pink-600 transition flex items-center justify-center gap-2"
+                  disabled={agendando}
+                  className="w-full bg-pink-500 text-white py-3 rounded-lg hover:bg-pink-600 transition flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <Sparkles className="w-5 h-5" />
-                  Agendar e enviar WhatsApp
+                  {agendando ? 'Agendando...' : 'Agendar e enviar WhatsApp'}
                 </button>
               </div>
             </div>
