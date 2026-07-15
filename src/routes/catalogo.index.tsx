@@ -43,7 +43,7 @@ function Catalogo() {
       </Link>
 
       <div className="flex items-center gap-2 text-pink-600 mb-4">
-        <Sparkles className="w-8 h-8" />
+        <img src="/vite.svg" alt="" className="w-8 h-8" />
         <h1 className="text-3xl font-bold">Catálogo de Serviços</h1>
       </div>
       <p className="text-gray-600 mb-6">Escolha um serviço e agende o melhor horário para você.</p>

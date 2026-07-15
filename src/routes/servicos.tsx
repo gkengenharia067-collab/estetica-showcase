@@ -162,7 +162,7 @@ function Servicos() {
       </Link>
 
       <h1 className="text-2xl font-bold text-pink-600 flex items-center gap-2">
-        <Sparkles className="w-6 h-6" />
+        <img src="/vite.svg" alt="" className="w-6 h-6" />
         Gerenciar Serviços
       </h1>
 
