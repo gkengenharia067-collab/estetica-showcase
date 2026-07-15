@@ -49,7 +49,7 @@ function Dashboard() {
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <h1 className="text-3xl font-bold text-pink-600 flex items-center gap-2">
-        <Sparkles className="w-8 h-8" />
+        <img src="/vite.svg" alt="" className="w-8 h-8" />
         {storeConfig.nome}
       </h1>
       <p className="text-gray-600 mb-6">Dashboard – visão geral da sua clínica</p>
