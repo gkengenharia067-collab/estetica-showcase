@@ -232,9 +232,10 @@ function DetalhesServico() {
                   <Phone className="w-4 h-4 text-pink-600" />
                   <input
                     type="tel"
+                    inputMode="numeric"
                     placeholder="Seu telefone (com DDD)"
                     value={clienteTelefone}
-                    onChange={(e) => setClienteTelefone(e.target.value)}
+                    onChange={(e) => setClienteTelefone(e.target.value.replace(/\D/g, ''))}
                     className="flex-1 border rounded-lg p-2"
                   />
                 </div>
