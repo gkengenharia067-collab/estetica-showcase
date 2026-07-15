@@ -1,10 +1,16 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { format } from 'date-fns'
 import { ArrowLeft, CalendarDays, User, Phone, Trash2, Wand2 } from 'lucide-react'
 import { storageSupabase } from '../services/storage.supabase.service'
 import { RequireAuth } from '../components/RequireAuth'
 
 export const Route = createFileRoute('/agendamentos')({
+  // Permite abrir a página já num filtro específico via URL,
+  // ex: /agendamentos?filtro=hoje (usado pelo card do dashboard).
+  validateSearch: (search: Record<string, unknown>) => ({
+    filtro: (search.filtro as string) || 'todos',
+  }),
   component: () => (
     <RequireAuth>
       <Agendamentos />
@@ -13,10 +19,11 @@ export const Route = createFileRoute('/agendamentos')({
 })
 
 function Agendamentos() {
+  const { filtro: filtroInicial } = Route.useSearch()
   const [carregando, setCarregando] = useState(true)
   const [agendamentos, setAgendamentos] = useState([])
   const [servicos, setServicos] = useState([])
-  const [filtro, setFiltro] = useState('todos') // todos | hoje | futuros
+  const [filtro, setFiltro] = useState(filtroInicial)
 
   useEffect(() => {
     carregar()
@@ -85,12 +92,15 @@ function Agendamentos() {
     return <div className="p-6 text-gray-500">Carregando...</div>
   }
 
-  const hojeStr = new Date().toISOString().slice(0, 10)
+  // Usa a data local (não UTC) para "hoje" bater com a data que o
+  // calendário de agendamento também usa (evita contagem/filtro errado
+  // perto da meia-noite, quando UTC e horário local já são dias diferentes).
+  const hojeStr = format(new Date(), 'yyyy-MM-dd')
 
   const listaFiltrada = agendamentos
     .filter(a => {
       if (filtro === 'hoje') return a.data === hojeStr
-      if (filtro === 'futuros') return a.data >= hojeStr
+      if (filtro === 'futuros') return a.data > hojeStr
       return true
     })
     .sort((a, b) => (a.data + a.horario).localeCompare(b.data + b.horario))

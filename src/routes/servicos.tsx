@@ -124,7 +124,10 @@ function Servicos() {
     if (current.includes(hora)) {
       setForm({ ...form, horarios: current.filter(h => h !== hora) })
     } else {
-      setForm({ ...form, horarios: [...current, hora] })
+      // .sort() aqui garante que os horários fiquem sempre em ordem
+      // cronológica, não na ordem em que foram clicados.
+      const atualizados = [...current, hora].sort()
+      setForm({ ...form, horarios: atualizados })
     }
   }
 

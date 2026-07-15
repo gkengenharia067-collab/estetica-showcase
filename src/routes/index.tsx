@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { CalendarDays, Sparkles, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { format } from 'date-fns'
 import { storeConfig } from '../config/store.config'
 import { storageSupabase } from '../services/storage.supabase.service'
 import { RequireAuth } from '../components/RequireAuth'
@@ -36,9 +37,14 @@ function Dashboard() {
     return <div className="p-6 text-gray-500">Carregando...</div>
   }
 
+  // Usa a data local (não UTC) para "hoje" bater com a data que o
+  // calendário de agendamento também usa (evita contagem errada perto
+  // da meia-noite, quando UTC e horário local já são dias diferentes).
+  const hojeStr = format(new Date(), 'yyyy-MM-dd')
+
   const totalServicos = servicos.length
-  const totalAgendamentos = agendamentos.length
-  const agendamentosHoje = agendamentos.filter(a => a.data === new Date().toISOString().slice(0,10)).length
+  const totalAgendamentos = agendamentos.filter(a => a.status !== 'cancelado').length
+  const agendamentosHoje = agendamentos.filter(a => a.data === hojeStr && a.status !== 'cancelado').length
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
@@ -67,7 +73,11 @@ function Dashboard() {
             </div>
           </div>
         </Link>
-        <Link to="/agendamentos" className="bg-white p-6 rounded-xl shadow-md border border-pink-100 hover:shadow-lg transition block">
+        <Link
+          to="/agendamentos"
+          search={{ filtro: 'hoje' }}
+          className="bg-white p-6 rounded-xl shadow-md border border-pink-100 hover:shadow-lg transition block"
+        >
           <div className="flex items-center gap-3">
             <Users className="w-8 h-8 text-green-500" />
             <div>
