@@ -23,9 +23,9 @@ export const storeConfig = {
   // Cores principais usadas nos botões, ícones e destaques.
   // Precisam ser nomes de cor válidos do Tailwind (ex: pink, blue, green, purple, orange).
   cores: {
-    primaria: 'stone',   // cor de destaque principal (títulos, botões principais)
-    secundaria: 'neutral', // cor usada em botões/ícones secundários
-    destaque: 'amber',  // cor usada em indicadores de sucesso/confirmação
+    primaria: 'pink',   // cor de destaque principal (títulos, botões principais)
+    secundaria: 'blue', // cor usada em botões/ícones secundários
+    destaque: 'green',  // cor usada em indicadores de sucesso/confirmação
   },
 
   // Senha de acesso ao painel administrativo (/servicos e /agendamentos).
