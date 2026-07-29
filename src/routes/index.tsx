@@ -37,11 +37,7 @@ function Dashboard() {
     return <div className="p-6 text-stone-500">Carregando...</div>
   }
 
-  // Usa a data local (não UTC) para "hoje" bater com a data que o
-  // calendário de agendamento também usa (evita contagem errada perto
-  // da meia-noite, quando UTC e horário local já são dias diferentes).
   const hojeStr = format(new Date(), 'yyyy-MM-dd')
-
   const totalServicos = servicos.length
   const totalAgendamentos = agendamentos.filter(a => a.status !== 'cancelado').length
   const agendamentosHoje = agendamentos.filter(a => a.data === hojeStr && a.status !== 'cancelado').length
@@ -88,14 +84,14 @@ function Dashboard() {
         </Link>
       </div>
 
-      <div className="mt-8 flex gap-4">
+      <div className="mt-8 flex gap-4 flex-wrap">
         <Link to="/servicos" className="bg-stone-700 text-white px-6 py-3 rounded-lg hover:bg-stone-800 transition">
           Gerenciar Serviços
         </Link>
-        <Link to="/catalogo" className="bg-neutral-600 text-white px-6 py-3 rounded-lg hover:bg-neutral-700 transition">
-          Ver Catálogo Público
+        <Link to="/catalogo" className="bg-neutral-700 text-white px-6 py-3 rounded-lg hover:bg-neutral-800 transition">
+          Ver Catálogo
         </Link>
-        <Link to="/agendamentos" className="bg-amber-600 text-white px-6 py-3 rounded-lg hover:bg-amber-700 transition">
+        <Link to="/agendamentos" className="bg-stone-700 text-white px-6 py-3 rounded-lg hover:bg-stone-800 transition">
           Ver Agendamentos
         </Link>
       </div>
